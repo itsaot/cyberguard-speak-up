@@ -122,7 +122,7 @@ const Home = () => {
             </Card>
             
             <Card className="p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
+              <div className="absolute top-24 right-24 w-24 h-24 opacity-20">
                 <img 
                   src={safeSpace} 
                   alt="Safe space concept with protection" 
