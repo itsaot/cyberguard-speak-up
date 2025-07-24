@@ -30,13 +30,13 @@ export const usePosts = () => {
   const toggleLike = async (postId: string, userId?: string) => {
     try {
       const result = await postApi.toggleLike(postId, userId);
-
+      
       setPosts(prevPosts => 
         prevPosts.map(post => 
-          post._id === postId
-            ? {
-                ...post,
-                likes: result.liked
+          post._id === postId 
+            ? { 
+                ...post, 
+                likes: result.liked 
                   ? [...post.likes, userId || 'anonymous-user'] // Add user to likes
                   : post.likes.filter(id => id !== (userId || 'anonymous-user')) // Remove user from likes
               }
@@ -45,7 +45,7 @@ export const usePosts = () => {
       );
 
       toast({
-        title: result.liked ? 'Post liked!' : 'Like removed',
+        title: result.liked ? "Post liked!" : "Like removed",
         description: `You ${result.liked ? 'liked' : 'unliked'} this post.`,
       });
     } catch (error) {
@@ -71,14 +71,14 @@ export const usePosts = () => {
       );
 
       toast({
-        title: 'Comment added!',
-        description: 'Your comment has been posted.',
+        title: "Comment added!",
+        description: "Your comment has been posted.",
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to add comment.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to add comment.",
+        variant: "destructive",
       });
     }
   };
@@ -86,29 +86,27 @@ export const usePosts = () => {
   const deleteComment = async (postId: string, commentId: string) => {
     try {
       await postApi.deleteComment(postId, commentId);
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post._id === postId
-            ? {
-                ...post,
-                comments: post.comments
-                  ? post.comments.filter((comment) => comment._id !== commentId)
-                  : [],
+      
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post._id === postId 
+            ? { 
+                ...post, 
+                comments: post.comments.filter(comment => comment._id !== commentId)
               }
             : post
         )
       );
 
       toast({
-        title: 'Comment deleted',
-        description: 'The comment has been removed.',
+        title: "Comment deleted",
+        description: "The comment has been removed.",
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to delete comment.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete comment.",
+        variant: "destructive",
       });
     }
   };
@@ -116,23 +114,16 @@ export const usePosts = () => {
   const flagPost = async (postId: string, reason: string) => {
     try {
       await postApi.flagPost(postId, reason);
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post._id === postId ? { ...post, flagged: true } : post
-        )
-      );
-
+      
       toast({
-        title: 'Post flagged',
-        description:
-          'Thank you for reporting. This post will be reviewed by our moderation team.',
+        title: "Post flagged",
+        description: "Thank you for reporting. This post will be reviewed by our moderation team.",
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to flag post.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to flag post.",
+        variant: "destructive",
       });
     }
   };
@@ -140,18 +131,18 @@ export const usePosts = () => {
   const deletePost = async (postId: string) => {
     try {
       await postApi.deletePost(postId);
-
-      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+      
+      setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
 
       toast({
-        title: 'Post deleted',
-        description: 'The post has been permanently removed.',
+        title: "Post deleted",
+        description: "The post has been permanently removed.",
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to delete post.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete post.",
+        variant: "destructive",
       });
     }
   };
