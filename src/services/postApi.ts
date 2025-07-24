@@ -118,17 +118,8 @@ export const postApi = {
     }
   },
 
-  // Flag a post - temporarily using a workaround since backend endpoint not ready
+  // Flag a post
   flagPost: async (postId: string, reason: string): Promise<void> => {
-    // For now, we'll simulate the flagging since the backend endpoint returns 404
-    // In a real implementation, you'd need to add this endpoint to your backend
-    console.log(`Flagging post ${postId} for reason: ${reason}`);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // You can uncomment this when the backend endpoint is ready:
-    /*
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/flag`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
@@ -138,7 +129,6 @@ export const postApi = {
     if (!response.ok) {
       throw new Error('Failed to flag post');
     }
-    */
   },
 
   // Delete a post (admin only)
