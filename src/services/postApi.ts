@@ -35,6 +35,7 @@ interface PostResponse {
 }
 
 interface CommentRequest {
+  userId: string;
   text: string;
 }
 
@@ -179,11 +180,13 @@ export const postApi = {
   },
 
   // Add reply to comment
-  addCommentReply: async (postId: string, commentId: string, text: string): Promise<any> => {
+  addCommentReply: async (postId: string, commentId: string, userId: string, text: string): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ text }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, text }),
     });
     
     if (!response.ok) {

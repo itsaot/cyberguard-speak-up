@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface PostCardProps {
   post: PostResponse;
   onToggleLike: (postId: string, userId?: string) => void;
-  onAddComment: (postId: string, text: string) => void;
+  onAddComment: (postId: string, text: string, userId?: string) => void;
   onDeleteComment: (postId: string, commentId: string) => void;
   onFlagPost: (postId: string, reason: string) => void;
   onDeletePost: (postId: string) => void;
@@ -44,7 +44,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
     setIsSubmittingComment(true);
     try {
-      await onAddComment(post._id, newComment.trim());
+      await onAddComment(post._id, newComment.trim(), user?.id);
       setNewComment('');
     } finally {
       setIsSubmittingComment(false);
@@ -72,7 +72,8 @@ const PostCard: React.FC<PostCardProps> = ({
 
     setIsSubmittingReply(true);
     try {
-      await postApi.addCommentReply(post._id, commentId, replyText.trim());
+      const userIdToSend = user?.id || `anonymous-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      await postApi.addCommentReply(post._id, commentId, userIdToSend, replyText.trim());
       setReplyText('');
       setReplyingTo(null);
       // Since backend endpoints aren't ready, we'll show success feedback for now

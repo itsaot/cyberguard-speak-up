@@ -57,9 +57,10 @@ export const usePosts = () => {
     }
   };
 
-  const addComment = async (postId: string, text: string) => {
+  const addComment = async (postId: string, text: string, userId?: string) => {
     try {
-      const newComment = await postApi.addComment(postId, { text });
+      const userIdToSend = userId || `anonymous-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newComment = await postApi.addComment(postId, { userId: userIdToSend, text });
       
       setPosts(prevPosts => 
         prevPosts.map(post => 
