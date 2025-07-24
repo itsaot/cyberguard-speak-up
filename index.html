@@ -3,18 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>cyberguard-speak-up</title>
-    <meta name="description" content="Dolce got it done" />
-    <meta name="author" content="Dolce" />
+    <title>CyberGuard</title>
+    <meta name="description" content="Safe platform for reporting bullying incidents" />
+    <meta name="author" content="CyberGuard Team" />
 
-    <meta property="og:title" content="cyberguard-speak-up" />
-    <meta property="og:description" content="Dolce got it done" />
+    <meta property="og:title" content="CyberGuard" />
+    <meta property="og:description" content="Safe platform for reporting bullying incidents" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLYuOfkKi7QN_Zy-TRyyELCFdU5MUE6inz9A&s" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="https://smzobosheportfolio.vercel.app/" />
-    <meta name="twitter:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLYuOfkKi7QN_Zy-TRyyELCFdU5MUE6inz9A&s" />
+    
+    <script>
+      // Handle 404s in client-side routing
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
   </head>
 
   <body>
