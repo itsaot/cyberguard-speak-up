@@ -12,7 +12,7 @@ import stopBullyingBanner from "@/assets/stop-bullying-banner.jpg";
 import supportHands from "@/assets/support-hands.jpg";
 
 interface Report {
-  id: string;
+  _id: string;
   type: string;
   severity: string;
   location: string;
@@ -101,6 +101,7 @@ const AdminDashboard = () => {
       const response = await fetch(`https://cybergaurd-backend-2.onrender.com/api/reports/${reportId}/flag`, {
         method: 'PATCH',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       });
@@ -253,7 +254,7 @@ const AdminDashboard = () => {
               </Card>
             ) : (
               reports.map((report) => (
-                <Card key={report.id}>
+                <Card key={report._id}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -290,7 +291,7 @@ const AdminDashboard = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleFlagReport(report.id)}
+                          onClick={() => handleFlagReport(report._id)}
                         >
                           <Flag className="h-4 w-4 mr-2" />
                           Flag for Review
@@ -327,7 +328,7 @@ const AdminDashboard = () => {
                           <Users className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium text-sm">{post.author}</p>
+                          <p className="font-medium text-sm">Anonymous</p>
                           <p className="text-xs text-muted-foreground">
                             {post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy at h:mm a') : 'Unknown date'}
                           </p>
