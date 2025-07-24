@@ -246,7 +246,7 @@ const AdminDashboard = () => {
                         <div>
                           <CardTitle className="text-lg capitalize">{report.type} Bullying</CardTitle>
                           <p className="text-sm text-muted-foreground">
-                            Reported {format(new Date(report.reportedAt), 'MMM d, yyyy at h:mm a')}
+                            Reported {report.reportedAt ? format(new Date(report.reportedAt), 'MMM d, yyyy at h:mm a') : 'Unknown date'}
                           </p>
                         </div>
                       </div>
@@ -314,7 +314,7 @@ const AdminDashboard = () => {
                         <div>
                           <p className="font-medium text-sm">{post.author}</p>
                           <p className="text-xs text-muted-foreground">
-                            {format(new Date(post.createdAt), 'MMM d, yyyy at h:mm a')}
+                            {post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy at h:mm a') : 'Unknown date'}
                           </p>
                         </div>
                       </div>
