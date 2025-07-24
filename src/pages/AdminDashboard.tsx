@@ -6,10 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Navigate } from 'react-router-dom';
-import { AlertTriangle, Flag, Users, TrendingUp, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, Flag, Users, TrendingUp, Eye, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import stopBullyingBanner from "@/assets/stop-bullying-banner.jpg";
 import supportHands from "@/assets/support-hands.jpg";
+import FlaggedPostsManager from '@/components/FlaggedPostsManager';
+import { postApi, PostResponse } from '@/services/postApi';
 
 interface Report {
   _id: string;
@@ -22,22 +24,17 @@ interface Report {
   flagged: boolean;
 }
 
-interface ForumPost {
-  id: string;
-  content: string;
-  author: string;
-  createdAt: string;
-}
 
 const AdminDashboard = () => {
   const { user } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
-  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [posts, setPosts] = useState<PostResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalReports: 0,
     flaggedReports: 0,
     totalPosts: 0,
+    flaggedPosts: 0,
   });
   const { toast } = useToast();
 
@@ -62,25 +59,24 @@ const AdminDashboard = () => {
       });
       
       // Fetch forum posts
-      const postsResponse = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts');
+      const postsData = await postApi.getPosts();
       
       if (reportsResponse.ok) {
         const reportsData = await reportsResponse.json();
         setReports(reportsData);
         
         // Calculate stats
+        const flaggedPostsCount = postsData.filter(post => post.flagged).length;
+        
         setStats({
           totalReports: reportsData.length,
           flaggedReports: reportsData.filter((r: Report) => r.flagged).length,
-          totalPosts: 0, // Will be updated when posts are fetched
+          totalPosts: postsData.length,
+          flaggedPosts: flaggedPostsCount,
         });
       }
       
-      if (postsResponse.ok) {
-        const postsData = await postsResponse.json();
-        setPosts(postsData);
-        setStats(prev => ({ ...prev, totalPosts: postsData.length }));
-      }
+      setPosts(postsData);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast({
@@ -180,7 +176,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -192,7 +188,6 @@ const AdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
 
         <Card>
           <CardContent className="p-6">
@@ -213,7 +208,19 @@ const AdminDashboard = () => {
                 <p className="text-sm font-medium text-muted-foreground">Forum Posts</p>
                 <p className="text-2xl font-bold">{stats.totalPosts}</p>
               </div>
-              <Users className="h-8 w-8 text-accent" />
+              <MessageSquare className="h-8 w-8 text-accent" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Flagged Posts</p>
+                <p className="text-2xl font-bold">{stats.flaggedPosts}</p>
+              </div>
+              <Flag className="h-8 w-8 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -223,7 +230,8 @@ const AdminDashboard = () => {
       <Tabs defaultValue="reports" className="space-y-6">
         <TabsList>
           <TabsTrigger value="reports">Incident Reports</TabsTrigger>
-          <TabsTrigger value="forum">Forum Posts</TabsTrigger>
+          <TabsTrigger value="flagged">Flagged Posts</TabsTrigger>
+          <TabsTrigger value="forum">All Forum Posts</TabsTrigger>
         </TabsList>
 
         {/* Reports Tab */}
@@ -292,7 +300,12 @@ const AdminDashboard = () => {
           </div>
         </TabsContent>
 
-        {/* Forum Posts Tab */}
+        {/* Flagged Posts Tab */}
+        <TabsContent value="flagged">
+          <FlaggedPostsManager />
+        </TabsContent>
+
+        {/* All Forum Posts Tab */}
         <TabsContent value="forum">
           <div className="space-y-4">
             {posts.length === 0 ? (
@@ -307,22 +320,45 @@ const AdminDashboard = () => {
               </Card>
             ) : (
               posts.map((post) => (
-                <Card key={post.id}>
+                <Card key={post._id} className={post.flagged ? 'border-orange-200 bg-orange-50/30' : ''}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-2">
                         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Users className="h-4 w-4 text-primary" />
+                          <MessageSquare className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium text-sm">Anonymous</p>
+                          <p className="font-medium text-sm capitalize">{post.type}</p>
                           <p className="text-xs text-muted-foreground">
-                            {post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy at h:mm a') : 'Unknown date'}
+                            {format(new Date(post.createdAt), 'MMM d, yyyy at h:mm a')}
                           </p>
                         </div>
                       </div>
+                      <div className="flex items-center space-x-2">
+                        {post.isAnonymous && (
+                          <Badge variant="outline" className="text-xs">Anonymous</Badge>
+                        )}
+                        {post.flagged && (
+                          <Badge variant="destructive" className="text-xs">
+                            <Flag className="h-3 w-3 mr-1" />
+                            Flagged
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-foreground whitespace-pre-wrap">{post.content}</p>
+                    <p className="text-foreground whitespace-pre-wrap mb-4">{post.content}</p>
+                    
+                    {/* Post Stats */}
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground border-t pt-3">
+                      <span className="flex items-center space-x-1">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{post.comments.length} comments</span>
+                      </span>
+                      <span>{post.likes.length} likes</span>
+                      {post.adviceRequested && (
+                        <span className="text-primary font-medium">Advice Requested</span>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))

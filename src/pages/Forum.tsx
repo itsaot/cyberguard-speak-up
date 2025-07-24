@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,55 +8,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Send, MessageSquare } from 'lucide-react';
-import { format } from 'date-fns';
-
-interface ForumPost {
-  _id: string;
-  type: 'physical' | 'verbal' | 'cyber';
-  content: string;
-  author?: string;
-  tags?: string[];
-  adviceRequested?: boolean;
-  isAnonymous?: boolean;
-  createdAt: string;
-}
+import { postApi } from '@/services/postApi';
+import { usePosts } from '@/hooks/usePosts';
+import PostCard from '@/components/PostCard';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Forum = () => {
-  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const { user } = useAuth();
+  const { 
+    posts, 
+    isLoading, 
+    fetchPosts,
+    toggleLike,
+    addComment,
+    deleteComment,
+    flagPost,
+    deletePost,
+  } = usePosts();
+
   const [newPost, setNewPost] = useState({
     type: '',
     content: '',
-    author: '',
     tags: '',
     adviceRequested: false,
     isAnonymous: true,
   });
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts');
-      if (response.ok) {
-        const data = await response.json();
-        setPosts(data);
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load posts.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,30 +54,18 @@ const Forum = () => {
     setIsSubmitting(true);
 
     try {
-      const requestBody = {
+      const postData = {
         type: newPost.type,
         content: newPost.content.trim(),
-        author: "Anonymous",
-        isAnonymous: true,
         tags: newPost.tags
           .split(',')
           .map(tag => tag.trim())
           .filter(tag => tag.length > 0),
         adviceRequested: newPost.adviceRequested,
+        isAnonymous: newPost.isAnonymous,
       };
 
-      const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to create post: ${errorText}`);
-      }
+      await postApi.createPost(postData);
 
       toast({
         title: "Success",
@@ -107,7 +75,6 @@ const Forum = () => {
       setNewPost({
         type: '',
         content: '',
-        author: '',
         tags: '',
         adviceRequested: false,
         isAnonymous: true,
@@ -179,6 +146,7 @@ const Forum = () => {
                     <SelectItem value="physical">Physical</SelectItem>
                     <SelectItem value="verbal">Verbal</SelectItem>
                     <SelectItem value="cyber">Cyber</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -257,46 +225,15 @@ const Forum = () => {
           </Card>
         ) : (
           posts.map((post) => (
-            <Card key={post._id}>
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      <MessageSquare className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm capitalize">{post.type}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(post.createdAt), 'MMM d, yyyy at h:mm a')}
-                      </p>
-                    </div>
-                  </div>
-                  {post.isAnonymous && (
-                    <span className="text-xs text-muted-foreground">Anonymous</span>
-                  )}
-                </div>
-                <p className="text-foreground whitespace-pre-wrap mb-4">{post.content}</p>
-                {post.tags && post.tags.length > 0 && (
-                  <div className="mb-2">
-                    <div className="flex flex-wrap gap-1">
-                      {post.tags.map((tag, index) => (
-                        <span key={index} className="inline-block bg-muted px-2 py-1 rounded-md text-xs text-muted-foreground">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="flex gap-4 text-xs">
-                  {post.adviceRequested && (
-                    <span className="text-primary font-medium">Advice Requested</span>
-                  )}
-                  {post.author && !post.isAnonymous && (
-                    <span className="text-muted-foreground">by {post.author}</span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <PostCard
+              key={post._id}
+              post={post}
+              onToggleLike={toggleLike}
+              onAddComment={addComment}
+              onDeleteComment={deleteComment}
+              onFlagPost={flagPost}
+              onDeletePost={deletePost}
+            />
           ))
         )}
       </div>
