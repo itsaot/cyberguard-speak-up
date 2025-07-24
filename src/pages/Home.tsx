@@ -2,6 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Shield, MessageSquare, AlertTriangle, Users, Lock, Heart } from 'lucide-react';
+import bullyingAwarenessBanner from '@/assets/bullying-awareness-banner.jpg';
+import helpingHands from '@/assets/helping-hands.jpg';
+import safeSpace from '@/assets/safe-space.jpg';
 
 const Home = () => {
   const features = [
@@ -30,8 +33,15 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 to-accent/10 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative bg-gradient-to-br from-primary/10 to-accent/10 py-20">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={bullyingAwarenessBanner} 
+            alt="Students standing together in solidarity against bullying" 
+            className="w-full h-full object-cover opacity-20"
+          />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-6">
             <Shield className="h-16 w-16 text-primary mr-4" />
             <h1 className="text-5xl font-bold text-foreground">CyberGuard</h1>
@@ -91,8 +101,15 @@ const Home = () => {
           </p>
           
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <CardContent className="text-center">
+            <Card className="p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
+                <img 
+                  src={helpingHands} 
+                  alt="Helping hands representing support" 
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </div>
+              <CardContent className="text-center relative z-10">
                 <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Report an Incident</h3>
                 <p className="text-muted-foreground mb-4">
@@ -104,8 +121,15 @@ const Home = () => {
               </CardContent>
             </Card>
             
-            <Card className="p-6">
-              <CardContent className="text-center">
+            <Card className="p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
+                <img 
+                  src={safeSpace} 
+                  alt="Safe space concept with protection" 
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </div>
+              <CardContent className="text-center relative z-10">
                 <MessageSquare className="h-12 w-12 text-accent mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Join the Community</h3>
                 <p className="text-muted-foreground mb-4">
