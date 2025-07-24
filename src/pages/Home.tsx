@@ -102,11 +102,11 @@ const Home = () => {
           
           <div className="grid md:grid-cols-2 gap-6">
             <Card className="p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
+              <div className="absolute inset-0 opacity-20">
                 <img 
                   src={helpingHands} 
                   alt="Helping hands representing support" 
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <CardContent className="text-center relative z-10">
@@ -122,11 +122,11 @@ const Home = () => {
             </Card>
             
             <Card className="p-6 relative overflow-hidden">
-              <div className="absolute top-24 right-24 w-24 h-24 opacity-20">
+              <div className="absolute inset-0 opacity-20">
                 <img 
                   src={safeSpace} 
                   alt="Safe space concept with protection" 
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <CardContent className="text-center relative z-10">
