@@ -385,10 +385,10 @@ const ReportIncident = () => {
             If you're in immediate danger or need urgent support:
           </p>
           <ul className="text-sm space-y-1 text-muted-foreground">
-            <li>• Emergency Services: 911</li>
+            <li>• Emergency Services: 911 - 10111</li>
             <li>• Crisis Text Line: Text HOME to 741741</li>
-            <li>• National Suicide Prevention Lifeline: 988</li>
-            <li>• Anti-Bullying Hotline: 1-800-273-8255</li>
+            <li>• National Suicide Prevention Lifeline: 0861-322-322</li>
+            <li>• Anti-Bullying Hotline: +27-808-168-9111</li>
           </ul>
         </CardContent>
       </Card>
