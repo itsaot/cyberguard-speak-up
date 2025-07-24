@@ -131,8 +131,8 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Flag Button */}
-            {user && !isAdmin && (
+            {/* Flag Button - Available for all authenticated users */}
+            {user && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-500">
@@ -143,7 +143,7 @@ const PostCard: React.FC<PostCardProps> = ({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Flag Post</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Please select a reason for flagging this post. Our moderation team will review it.
+                      Please select a reason for flagging this post. {isAdmin ? 'As an admin, you can flag posts for immediate review.' : 'Our moderation team will review it.'}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div className="py-4">
