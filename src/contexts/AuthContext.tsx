@@ -61,6 +61,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
+      // Temporary hardcoded admin credentials for development
+      if (username === "admin" && password === "admin123") {
+        const adminUser = {
+          id: "admin-001",
+          username: "admin",
+          isAdmin: true
+        };
+        localStorage.setItem('cyberguard_token', 'dev-admin-token');
+        setUser(adminUser);
+        return true;
+      }
+
+      // Try backend authentication
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
