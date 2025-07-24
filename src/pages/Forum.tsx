@@ -2,20 +2,35 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MessageSquare, Plus, Send } from 'lucide-react';
+import { Plus, Send, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ForumPost {
-  id: string;
+  _id: string;
+  type: 'physical' | 'verbal' | 'cyber';
   content: string;
-  author: string;
+  tags?: string[];
+  adviceRequested?: boolean;
+  escalated?: boolean;
+  isAnonymous?: boolean;
   createdAt: string;
 }
 
 const Forum = () => {
   const [posts, setPosts] = useState<ForumPost[]>([]);
-  const [newPost, setNewPost] = useState('');
+  const [newPost, setNewPost] = useState({
+    type: '',
+    content: '',
+    tags: '',
+    adviceRequested: false,
+    escalated: false,
+    isAnonymous: false,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -33,10 +48,9 @@ const Forum = () => {
         setPosts(data);
       }
     } catch (error) {
-      console.error('Error fetching posts:', error);
       toast({
         title: "Error",
-        description: "Failed to load forum posts. Please try again later.",
+        description: "Failed to load posts.",
         variant: "destructive",
       });
     } finally {
@@ -46,77 +60,65 @@ const Forum = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPost.trim()) return;
+
+    if (!newPost.type || !newPost.content.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Type and content are required.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
+
     try {
-      // No authentication required for forum posts
-      console.log('📝 Forum POST - Creating anonymous post');
-      
-      // Validate content before sending
-      if (!newPost.trim()) {
-        toast({
-          title: "Error",
-          description: "Post content is required.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
       const requestBody = {
-        content: newPost.trim(),
-        type: 'verbal', // Must be one of: "physical", "verbal", "cyber"
-        isAnonymous: true
-        // Do not send: author, createdAt (backend handles these)
+        type: newPost.type,
+        content: newPost.content.trim(),
+        tags: newPost.tags
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(tag => tag.length > 0),
+        adviceRequested: newPost.adviceRequested,
+        escalated: newPost.escalated,
+        isAnonymous: newPost.isAnonymous,
       };
-      console.log('📝 Forum POST - Request body:', requestBody);
-
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-
-      console.log('📡 Forum POST - Headers being sent:', headers);
 
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts', {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(requestBody),
       });
 
-      console.log('📊 Forum POST - Response status:', response.status);
-      console.log('📊 Forum POST - Response headers:', Object.fromEntries(response.headers.entries()));
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Forum POST - Error response body:', errorText);
-        
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-          console.error('❌ Forum POST - Parsed error:', errorData);
-        } catch {
-          console.error('❌ Forum POST - Raw error text:', errorText);
-        }
-        
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        throw new Error(`Failed to create post: ${errorText}`);
       }
 
-      const responseData = await response.json();
-      console.log('✅ Forum POST - Success response:', responseData);
-      
-      setNewPost('');
-      setShowForm(false);
-      fetchPosts(); // Refresh posts
       toast({
         title: "Success",
-        description: "Your post has been shared with the community.",
+        description: "Post created successfully!",
       });
+
+      setNewPost({
+        type: '',
+        content: '',
+        tags: '',
+        adviceRequested: false,
+        escalated: false,
+        isAnonymous: false,
+      });
+
+      setShowForm(false);
+      fetchPosts();
+
     } catch (error) {
-      console.error('Error creating post:', error);
       toast({
         title: "Error",
-        description: "Failed to share your post. Please try again.",
+        description: error instanceof Error ? error.message : 'Failed to create post',
         variant: "destructive",
       });
     } finally {
@@ -162,17 +164,73 @@ const Forum = () => {
       {showForm && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Share with the Community</CardTitle>
+            <CardTitle>Create New Post</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Textarea
-                placeholder="Share your thoughts, experiences, or offer support to others..."
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                className="min-h-[120px]"
-                required
-              />
+              <div>
+                <Label htmlFor="type">Type *</Label>
+                <Select value={newPost.type} onValueChange={(value) => setNewPost(prev => ({ ...prev, type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="physical">Physical</SelectItem>
+                    <SelectItem value="verbal">Verbal</SelectItem>
+                    <SelectItem value="cyber">Cyber</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="content">Content *</Label>
+                <Textarea
+                  id="content"
+                  placeholder="Write your post content here"
+                  value={newPost.content}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+                  required
+                  className="min-h-[120px]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="tags">Tags (comma separated)</Label>
+                <Input
+                  id="tags"
+                  placeholder="example: bullying, school"
+                  value={newPost.tags}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, tags: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="adviceRequested"
+                  checked={newPost.adviceRequested}
+                  onCheckedChange={(checked) => setNewPost(prev => ({ ...prev, adviceRequested: checked as boolean }))}
+                />
+                <Label htmlFor="adviceRequested">Advice Requested</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="escalated"
+                  checked={newPost.escalated}
+                  onCheckedChange={(checked) => setNewPost(prev => ({ ...prev, escalated: checked as boolean }))}
+                />
+                <Label htmlFor="escalated">Escalated</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isAnonymous"
+                  checked={newPost.isAnonymous}
+                  onCheckedChange={(checked) => setNewPost(prev => ({ ...prev, isAnonymous: checked as boolean }))}
+                />
+                <Label htmlFor="isAnonymous">Submit Anonymously</Label>
+              </div>
+
               <div className="flex justify-end space-x-2">
                 <Button
                   type="button"
@@ -181,13 +239,13 @@ const Forum = () => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting || !newPost.trim()}>
+                <Button type="submit" disabled={isSubmitting || !newPost.type || !newPost.content.trim()}>
                   {isSubmitting ? (
-                    "Posting..."
+                    "Submitting..."
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      Post
+                      Submit Post
                     </>
                   )}
                 </Button>
@@ -215,22 +273,44 @@ const Forum = () => {
           </Card>
         ) : (
           posts.map((post) => (
-            <Card key={post.id}>
+            <Card key={post._id}>
               <CardContent className="pt-6">
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                       <MessageSquare className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{post.author}</p>
+                      <p className="font-medium text-sm capitalize">{post.type}</p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(post.createdAt), 'MMM d, yyyy at h:mm a')}
                       </p>
                     </div>
                   </div>
+                  {post.isAnonymous && (
+                    <span className="text-xs text-muted-foreground">Anonymous</span>
+                  )}
                 </div>
-                <p className="text-foreground whitespace-pre-wrap">{post.content}</p>
+                <p className="text-foreground whitespace-pre-wrap mb-4">{post.content}</p>
+                {post.tags && post.tags.length > 0 && (
+                  <div className="mb-2">
+                    <div className="flex flex-wrap gap-1">
+                      {post.tags.map((tag, index) => (
+                        <span key={index} className="inline-block bg-muted px-2 py-1 rounded-md text-xs text-muted-foreground">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex gap-4 text-xs">
+                  {post.adviceRequested && (
+                    <span className="text-primary font-medium">Advice Requested</span>
+                  )}
+                  {post.escalated && (
+                    <span className="text-destructive font-medium">Escalated</span>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))
