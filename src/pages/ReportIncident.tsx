@@ -24,16 +24,35 @@ const ReportIncident = () => {
     setIsSubmitting(true);
 
     try {
+      const token = localStorage.getItem('cyberguard_token');
+      console.log('Report POST - Token exists:', !!token);
+      
+      const requestBody = {
+        type: formData.type,
+        location: formData.location || '',
+        description: formData.description,
+        severity: formData.severity,
+        anonymous: formData.anonymous,
+        reportedAt: new Date().toISOString(),
+      };
+      console.log('Report POST - Request body:', requestBody);
+
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
         },
-        body: JSON.stringify({
-          ...formData,
-          reportedAt: new Date().toISOString(),
-        }),
+        body: JSON.stringify(requestBody),
       });
+
+      console.log('Report POST - Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Report POST - Error response:', errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
+      }
 
       if (response.ok) {
         // Reset form

@@ -50,16 +50,31 @@ const Forum = () => {
 
     setIsSubmitting(true);
     try {
+      const token = localStorage.getItem('cyberguard_token');
+      console.log('Forum POST - Token exists:', !!token);
+      
+      const requestBody = {
+        content: newPost,
+        author: 'Anonymous'
+      };
+      console.log('Forum POST - Request body:', requestBody);
+
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
         },
-        body: JSON.stringify({
-          content: newPost,
-          author: 'Anonymous', // Default to anonymous
-        }),
+        body: JSON.stringify(requestBody),
       });
+
+      console.log('Forum POST - Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Forum POST - Error response:', errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
+      }
 
       if (response.ok) {
         setNewPost('');
