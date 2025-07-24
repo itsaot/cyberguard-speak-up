@@ -50,9 +50,9 @@ export const usePosts = () => {
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to update like.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update like.",
+        variant: "destructive",
       });
     }
   };
@@ -66,7 +66,6 @@ export const usePosts = () => {
         prevPosts.map(post => 
           post._id === postId 
             ? { ...post, comments: [...post.comments, newComment] }
->>>>>>> 2aacd6fd3b1f10ee88b9e23f2dc3710b9de251f3
             : post
         )
       );
