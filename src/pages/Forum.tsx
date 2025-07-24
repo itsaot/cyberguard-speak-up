@@ -15,8 +15,13 @@ interface ForumPost {
   type: 'physical' | 'verbal' | 'cyber';
   content: string;
   tags?: string[];
+  category?: string;
   adviceRequested?: boolean;
   escalated?: boolean;
+  escalationDetails?: {
+    reportedBy?: string;  // Normally ObjectId, but here just string input for demo
+    reportedAt?: string;  // ISO date string
+  };
   isAnonymous?: boolean;
   createdAt: string;
 }
@@ -27,8 +32,11 @@ const Forum = () => {
     type: '',
     content: '',
     tags: '',
+    category: '',
     adviceRequested: false,
     escalated: false,
+    escalationReportedBy: '',  // For escalationDetails.reportedBy
+    escalationReportedAt: '',  // For escalationDetails.reportedAt
     isAnonymous: false,
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -73,17 +81,25 @@ const Forum = () => {
     setIsSubmitting(true);
 
     try {
-      const requestBody = {
+      const requestBody: any = {
         type: newPost.type,
         content: newPost.content.trim(),
         tags: newPost.tags
           .split(',')
           .map(tag => tag.trim())
           .filter(tag => tag.length > 0),
+        category: newPost.category.trim() || undefined,
         adviceRequested: newPost.adviceRequested,
         escalated: newPost.escalated,
         isAnonymous: newPost.isAnonymous,
       };
+
+      if (newPost.escalated) {
+        requestBody.escalationDetails = {
+          reportedBy: newPost.escalationReportedBy.trim() || undefined,
+          reportedAt: newPost.escalationReportedAt ? new Date(newPost.escalationReportedAt).toISOString() : undefined,
+        };
+      }
 
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts', {
         method: 'POST',
@@ -107,8 +123,11 @@ const Forum = () => {
         type: '',
         content: '',
         tags: '',
+        category: '',
         adviceRequested: false,
         escalated: false,
+        escalationReportedBy: '',
+        escalationReportedAt: '',
         isAnonymous: false,
       });
 
@@ -204,6 +223,16 @@ const Forum = () => {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Input
+                  id="category"
+                  placeholder="Optional category"
+                  value={newPost.category}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, category: e.target.value }))}
+                />
+              </div>
+
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="adviceRequested"
@@ -221,6 +250,31 @@ const Forum = () => {
                 />
                 <Label htmlFor="escalated">Escalated</Label>
               </div>
+
+              {/* Show escalation details inputs only if escalated is true */}
+              {newPost.escalated && (
+                <>
+                  <div>
+                    <Label htmlFor="escalationReportedBy">Escalation Reported By (User ID)</Label>
+                    <Input
+                      id="escalationReportedBy"
+                      placeholder="User ID who reported"
+                      value={newPost.escalationReportedBy}
+                      onChange={(e) => setNewPost(prev => ({ ...prev, escalationReportedBy: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="escalationReportedAt">Escalation Reported At</Label>
+                    <Input
+                      type="date"
+                      id="escalationReportedAt"
+                      value={newPost.escalationReportedAt}
+                      onChange={(e) => setNewPost(prev => ({ ...prev, escalationReportedAt: e.target.value }))}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="flex items-center space-x-2">
                 <Checkbox
