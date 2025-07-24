@@ -14,14 +14,9 @@ interface ForumPost {
   _id: string;
   type: 'physical' | 'verbal' | 'cyber';
   content: string;
+  author?: string;
   tags?: string[];
-  category?: string;
   adviceRequested?: boolean;
-  escalated?: boolean;
-  escalationDetails?: {
-    reportedBy?: string;  // Normally ObjectId, but here just string input for demo
-    reportedAt?: string;  // ISO date string
-  };
   isAnonymous?: boolean;
   createdAt: string;
 }
@@ -31,12 +26,9 @@ const Forum = () => {
   const [newPost, setNewPost] = useState({
     type: '',
     content: '',
+    author: '',
     tags: '',
-    category: '',
     adviceRequested: false,
-    escalated: false,
-    escalationReportedBy: '',  // For escalationDetails.reportedBy
-    escalationReportedAt: '',  // For escalationDetails.reportedAt
     isAnonymous: false,
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +61,7 @@ const Forum = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation
     if (!newPost.type || !newPost.content.trim()) {
       toast({
         title: "Validation Error",
@@ -78,28 +71,29 @@ const Forum = () => {
       return;
     }
 
+    if (!newPost.isAnonymous && !newPost.author.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Author is required unless posting anonymously.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const requestBody: any = {
+      const requestBody = {
         type: newPost.type,
         content: newPost.content.trim(),
+        author: newPost.isAnonymous ? "Anonymous" : newPost.author.trim(),
+        isAnonymous: newPost.isAnonymous,
         tags: newPost.tags
           .split(',')
           .map(tag => tag.trim())
           .filter(tag => tag.length > 0),
-        category: newPost.category.trim() || undefined,
         adviceRequested: newPost.adviceRequested,
-        escalated: newPost.escalated,
-        isAnonymous: newPost.isAnonymous,
       };
-
-      if (newPost.escalated) {
-        requestBody.escalationDetails = {
-          reportedBy: newPost.escalationReportedBy.trim() || undefined,
-          reportedAt: newPost.escalationReportedAt ? new Date(newPost.escalationReportedAt).toISOString() : undefined,
-        };
-      }
 
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts', {
         method: 'POST',
@@ -122,12 +116,9 @@ const Forum = () => {
       setNewPost({
         type: '',
         content: '',
+        author: '',
         tags: '',
-        category: '',
         adviceRequested: false,
-        escalated: false,
-        escalationReportedBy: '',
-        escalationReportedAt: '',
         isAnonymous: false,
       });
 
@@ -213,6 +204,19 @@ const Forum = () => {
                 />
               </div>
 
+              {!newPost.isAnonymous && (
+                <div>
+                  <Label htmlFor="author">Author *</Label>
+                  <Input
+                    id="author"
+                    placeholder="Your name"
+                    value={newPost.author}
+                    onChange={(e) => setNewPost(prev => ({ ...prev, author: e.target.value }))}
+                    required={!newPost.isAnonymous}
+                  />
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="tags">Tags (comma separated)</Label>
                 <Input
@@ -220,16 +224,6 @@ const Forum = () => {
                   placeholder="example: bullying, school"
                   value={newPost.tags}
                   onChange={(e) => setNewPost(prev => ({ ...prev, tags: e.target.value }))}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  placeholder="Optional category"
-                  value={newPost.category}
-                  onChange={(e) => setNewPost(prev => ({ ...prev, category: e.target.value }))}
                 />
               </div>
 
@@ -241,40 +235,6 @@ const Forum = () => {
                 />
                 <Label htmlFor="adviceRequested">Advice Requested</Label>
               </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="escalated"
-                  checked={newPost.escalated}
-                  onCheckedChange={(checked) => setNewPost(prev => ({ ...prev, escalated: checked as boolean }))}
-                />
-                <Label htmlFor="escalated">Escalated</Label>
-              </div>
-
-              {/* Show escalation details inputs only if escalated is true */}
-              {newPost.escalated && (
-                <>
-                  <div>
-                    <Label htmlFor="escalationReportedBy">Escalation Reported By (User ID)</Label>
-                    <Input
-                      id="escalationReportedBy"
-                      placeholder="User ID who reported"
-                      value={newPost.escalationReportedBy}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, escalationReportedBy: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="escalationReportedAt">Escalation Reported At</Label>
-                    <Input
-                      type="date"
-                      id="escalationReportedAt"
-                      value={newPost.escalationReportedAt}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, escalationReportedAt: e.target.value }))}
-                    />
-                  </div>
-                </>
-              )}
 
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -361,8 +321,8 @@ const Forum = () => {
                   {post.adviceRequested && (
                     <span className="text-primary font-medium">Advice Requested</span>
                   )}
-                  {post.escalated && (
-                    <span className="text-destructive font-medium">Escalated</span>
+                  {post.author && !post.isAnonymous && (
+                    <span className="text-muted-foreground">by {post.author}</span>
                   )}
                 </div>
               </CardContent>
