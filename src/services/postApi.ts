@@ -78,10 +78,16 @@ export const postApi = {
   },
 
   // Like/unlike a post
-  toggleLike: async (postId: string): Promise<{ liked: boolean; likesCount: number }> => {
+  toggleLike: async (postId: string, userId?: string): Promise<{ liked: boolean; likesCount: number }> => {
+    // Generate a default userId if none provided (for anonymous users)
+    const userIdToSend = userId || `anonymous-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: userIdToSend }),
     });
     
     if (!response.ok) {

@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface PostCardProps {
   post: PostResponse;
-  onToggleLike: (postId: string) => void;
+  onToggleLike: (postId: string, userId?: string) => void;
   onAddComment: (postId: string, text: string) => void;
   onDeleteComment: (postId: string, commentId: string) => void;
   onFlagPost: (postId: string, reason: string) => void;
@@ -148,7 +148,7 @@ const PostCard: React.FC<PostCardProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onToggleLike(post._id)}
+              onClick={() => onToggleLike(post._id, user?.id)}
               className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />

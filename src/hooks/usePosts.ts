@@ -27,9 +27,9 @@ export const usePosts = () => {
     fetchPosts();
   }, []);
 
-  const toggleLike = async (postId: string) => {
+  const toggleLike = async (postId: string, userId?: string) => {
     try {
-      const result = await postApi.toggleLike(postId);
+      const result = await postApi.toggleLike(postId, userId);
       
       setPosts(prevPosts => 
         prevPosts.map(post => 
@@ -37,8 +37,8 @@ export const usePosts = () => {
             ? { 
                 ...post, 
                 likes: result.liked 
-                  ? [...post.likes, 'current-user'] // Add current user to likes
-                  : post.likes.filter(id => id !== 'current-user') // Remove current user from likes
+                  ? [...post.likes, userId || 'anonymous-user'] // Add user to likes
+                  : post.likes.filter(id => id !== (userId || 'anonymous-user')) // Remove user from likes
               }
             : post
         )
