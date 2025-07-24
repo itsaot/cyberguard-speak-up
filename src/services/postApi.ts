@@ -101,7 +101,9 @@ export const postApi = {
   addComment: async (postId: string, commentData: CommentRequest): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(commentData),
     });
     
