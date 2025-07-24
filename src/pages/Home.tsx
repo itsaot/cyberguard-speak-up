@@ -104,7 +104,7 @@ const Home = () => {
             <Card className="p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
                 <img 
-                  src={helpingHands} 
+                  src="https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?w=400&h=400&fit=crop" 
                   alt="Helping hands representing support" 
                   className="w-full h-full object-cover rounded-lg"
                 />
@@ -124,7 +124,7 @@ const Home = () => {
             <Card className="p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 opacity-20">
                 <img 
-                  src={safeSpace} 
+                  src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=400&fit=crop" 
                   alt="Safe space concept with protection" 
                   className="w-full h-full object-cover rounded-lg"
                 />
