@@ -59,8 +59,9 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const handleCommentLike = async (commentId: string) => {
     try {
-      await postApi.toggleCommentLike(post._id, commentId);
-      // You would need to refresh the post data here or update the local state
+      const result = await postApi.toggleCommentLike(post._id, commentId);
+      // Since backend endpoints aren't ready, we'll show success feedback for now
+      console.log('Comment like toggled:', result);
     } catch (error) {
       console.error('Failed to like comment:', error);
     }
@@ -74,11 +75,21 @@ const PostCard: React.FC<PostCardProps> = ({
       await postApi.addCommentReply(post._id, commentId, replyText.trim());
       setReplyText('');
       setReplyingTo(null);
-      // You would need to refresh the post data here
+      // Since backend endpoints aren't ready, we'll show success feedback for now
+      console.log('Reply added successfully');
     } catch (error) {
       console.error('Failed to add reply:', error);
     } finally {
       setIsSubmittingReply(false);
+    }
+  };
+
+  const handleReplyLike = async (commentId: string, replyId: string) => {
+    try {
+      // This would need a backend endpoint for reply likes
+      console.log('Reply like toggled for reply:', replyId);
+    } catch (error) {
+      console.error('Failed to like reply:', error);
     }
   };
 
@@ -352,6 +363,7 @@ const PostCard: React.FC<PostCardProps> = ({
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                onClick={() => handleReplyLike(comment._id, reply._id)}
                                 className="h-5 p-1 text-muted-foreground hover:text-red-500"
                               >
                                 <Heart className="h-2 w-2 mr-1" />
