@@ -112,7 +112,7 @@ const Home = () => {
               <CardContent className="text-center relative z-10">
                 <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Report an Incident</h3>
-                <p className="text-white mb-4">
+                <p className="text-muted-foreground mb-4">
                   Safely and anonymously report bullying incidents. Your report will be reviewed by our admin team.
                 </p>
                 <Link to="/report">
@@ -132,7 +132,7 @@ const Home = () => {
               <CardContent className="text-center relative z-10">
                 <MessageSquare className="h-12 w-12 text-accent mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Join the Community</h3>
-                <p className="text-white mb-4">
+                <p className="text-muted-foreground mb-4">
                   Connect with others, share your experiences, and find support in our community forum.
                 </p>
                 <Link to="/forum">
