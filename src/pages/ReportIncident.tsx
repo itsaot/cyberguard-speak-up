@@ -34,13 +34,7 @@ const ReportIncident = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem('cyberguard_token');
-      console.log('🔑 Report POST - Token exists:', !!token);
-      console.log('🔑 Report POST - Token preview:', token ? `${token.substring(0, 10)}...` : 'null');
-      
-      if (!token) {
-        console.warn('⚠️ Report POST - No token found, this might cause 401');
-      }
+      // No authentication required for report submissions
       
       // Validate required fields before sending
       const requiredFields = ['incidentType', 'severity', 'description', 'location', 'date', 'time', 'reporterType'];
@@ -98,14 +92,9 @@ const ReportIncident = () => {
         bodySize: JSON.stringify(requestBody).length
       });
 
-      const headers: Record<string, string> = {
+      const headers = {
         'Content-Type': 'application/json'
       };
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-        console.log('🔐 Report POST - Authorization header added');
-      }
 
       console.log('📡 Report POST - Headers being sent:', headers);
 
