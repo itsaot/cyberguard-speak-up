@@ -32,7 +32,7 @@ const PostCard: React.FC<PostCardProps> = ({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [flagReason, setFlagReason] = useState('');
 
-  const isLiked = user ? post.likes.includes(user.id) : false;
+  const isLiked = user ? post.likes?.includes(user.id) || false : false;
   const isAdmin = user?.isAdmin || false;
 
   const handleAddComment = async (e: React.FormEvent) => {
@@ -114,7 +114,7 @@ const PostCard: React.FC<PostCardProps> = ({
               disabled={!user}
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-              <span>{post.likes.length}</span>
+              <span>{post.likes?.length || 0}</span>
             </Button>
 
             {/* Comments Button */}
@@ -125,7 +125,7 @@ const PostCard: React.FC<PostCardProps> = ({
               className="flex items-center space-x-1"
             >
               <MessageSquare className="h-4 w-4" />
-              <span>{post.comments.length}</span>
+              <span>{post.comments?.length || 0}</span>
               {showComments ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </Button>
           </div>
@@ -223,12 +223,12 @@ const PostCard: React.FC<PostCardProps> = ({
 
             {/* Comments List */}
             <div className="space-y-3">
-              {post.comments.length === 0 ? (
+              {(post.comments?.length || 0) === 0 ? (
                 <p className="text-muted-foreground text-sm text-center py-4">
                   No comments yet. Be the first to comment!
                 </p>
               ) : (
-                post.comments.map((comment) => (
+                (post.comments || []).map((comment) => (
                   <div key={comment._id} className="bg-muted/50 p-3 rounded-lg">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center space-x-2">
