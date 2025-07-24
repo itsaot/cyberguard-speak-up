@@ -17,7 +17,6 @@ const ReportIncident = () => {
     description: '',
     location: '',
     date: '',
-    time: '',
     reporterType: '',
     anonymous: true,
     witnesses: '',
@@ -131,7 +130,6 @@ const ReportIncident = () => {
         description: '',
         location: '',
         date: '',
-        time: '',
         reporterType: '',
         anonymous: true,
         witnesses: '',
@@ -247,28 +245,16 @@ const ReportIncident = () => {
               />
             </div>
 
-            {/* Date and Time */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date">Date *</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => handleInputChange('date', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="time">Time *</Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={formData.time}
-                  onChange={(e) => handleInputChange('time', e.target.value)}
-                  required
-                />
-              </div>
+            {/* Date */}
+            <div className="space-y-2">
+              <Label htmlFor="date">Date *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => handleInputChange('date', e.target.value)}
+                required
+              />
             </div>
 
             {/* Reporter Type */}
@@ -376,7 +362,7 @@ const ReportIncident = () => {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isSubmitting || !formData.incidentType || !formData.severity || !formData.description || !formData.location || !formData.date || !formData.time || !formData.reporterType}
+                disabled={isSubmitting || !formData.incidentType || !formData.severity || !formData.description || !formData.location || !formData.date || !formData.reporterType}
               >
                 {isSubmitting ? (
                   "Submitting Report..."
