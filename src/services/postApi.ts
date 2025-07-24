@@ -55,11 +55,11 @@ export const postApi = {
     const response = await fetch(`${API_BASE_URL}/posts`, {
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch posts');
     }
-    
+
     return response.json();
   },
 
@@ -70,11 +70,11 @@ export const postApi = {
       headers: getAuthHeaders(),
       body: JSON.stringify(postData),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to create post');
     }
-    
+
     return response.json();
   },
 
@@ -82,7 +82,7 @@ export const postApi = {
   toggleLike: async (postId: string, userId?: string): Promise<{ liked: boolean; likesCount: number }> => {
     // Generate a default userId if none provided (for anonymous users)
     const userIdToSend = userId || `anonymous-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
       headers: {
@@ -90,11 +90,11 @@ export const postApi = {
       },
       body: JSON.stringify({ userId: userIdToSend }),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to toggle like');
     }
-    
+
     return response.json();
   },
 
@@ -107,11 +107,11 @@ export const postApi = {
       },
       body: JSON.stringify(commentData),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to add comment');
     }
-    
+
     return response.json();
   },
 
@@ -121,20 +121,23 @@ export const postApi = {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to delete comment');
     }
   },
 
-  // Flag a post
+  // Flag a post (changed to POST, assuming backend expects this)
   flagPost: async (postId: string, reason: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/flag`, {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
       body: JSON.stringify({ reason }),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to flag post');
     }
@@ -146,7 +149,7 @@ export const postApi = {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to delete post');
     }
@@ -157,25 +160,31 @@ export const postApi = {
     const response = await fetch(`${API_BASE_URL}/posts/flagged`, {
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch flagged posts');
     }
-    
+
     return response.json();
   },
 
   // Like a comment
-  toggleCommentLike: async (postId: string, commentId: string): Promise<{ liked: boolean; likesCount: number }> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/like`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-    });
-    
+  toggleCommentLike: async (
+    postId: string,
+    commentId: string
+  ): Promise<{ liked: boolean; likesCount: number }> => {
+    const response = await fetch(
+      `${API_BASE_URL}/posts/${postId}/comments/${commentId}/like`,
+      {
+        method: 'POST',
+        headers: getAuthHeaders(),
+      }
+    );
+
     if (!response.ok) {
       throw new Error('Failed to like comment');
     }
-    
+
     return response.json();
   },
 
@@ -189,10 +198,11 @@ export const postApi = {
       body: JSON.stringify({ userId, text }),
     });
     
+>>>>>>> 2aacd6fd3b1f10ee88b9e23f2dc3710b9de251f3
     if (!response.ok) {
       throw new Error('Failed to add reply');
     }
-    
+
     return response.json();
   },
 };

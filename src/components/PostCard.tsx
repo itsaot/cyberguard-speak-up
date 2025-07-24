@@ -94,8 +94,9 @@ const PostCard: React.FC<PostCardProps> = ({
     }
   };
 
+>>>>>>> 2aacd6fd3b1f10ee88b9e23f2dc3710b9de251f3
   const canDeleteComment = (commentUserId: string) => {
-    return isAdmin || (user && user.id === commentUserId);
+    return isAdmin || (user && user._id === commentUserId);
   };
 
   return (
@@ -134,7 +135,10 @@ const PostCard: React.FC<PostCardProps> = ({
           <div className="mb-4">
             <div className="flex flex-wrap gap-1">
               {post.tags.map((tag, index) => (
-                <span key={index} className="inline-block bg-muted px-2 py-1 rounded-md text-xs text-muted-foreground">
+                <span
+                  key={index}
+                  className="inline-block bg-muted px-2 py-1 rounded-md text-xs text-muted-foreground"
+                >
                   {tag}
                 </span>
               ))}
@@ -149,7 +153,7 @@ const PostCard: React.FC<PostCardProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onToggleLike(post._id, user?.id)}
+              onClick={() => onToggleLike(post._id, user?._id)}
               className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
@@ -170,7 +174,7 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Flag Button - Available for all authenticated users */}
+            {/* Flag Button */}
             {user && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -182,7 +186,10 @@ const PostCard: React.FC<PostCardProps> = ({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Flag Post</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Please select a reason for flagging this post. {isAdmin ? 'As an admin, you can flag posts for immediate review.' : 'Our moderation team will review it.'}
+                      Please select a reason for flagging this post.{' '}
+                      {isAdmin
+                        ? 'As an admin, you can flag posts for immediate review.'
+                        : 'Our moderation team will review it.'}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div className="py-4">
@@ -226,7 +233,10 @@ const PostCard: React.FC<PostCardProps> = ({
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDeletePost(post._id)} className="bg-red-600 hover:bg-red-700">
+                    <AlertDialogAction
+                      onClick={() => onDeletePost(post._id)}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
                       Delete Post
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -247,15 +257,17 @@ const PostCard: React.FC<PostCardProps> = ({
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Add a comment..."
                   className="flex-1 min-h-[80px]"
+                  disabled={!user}
                 />
-                <Button
-                  type="submit"
-                  disabled={!newComment.trim() || isSubmittingComment}
-                  size="sm"
-                >
+                <Button type="submit" disabled={!newComment.trim() || isSubmittingComment || !user} size="sm">
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
+              {!user && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  You must be logged in to comment.
+                </p>
+              )}
             </form>
 
             {/* Comments List */}
@@ -286,88 +298,20 @@ const PostCard: React.FC<PostCardProps> = ({
                       )}
                     </div>
                     <p className="text-sm text-foreground mb-3">{comment.text}</p>
-                    
-                    {/* Comment Actions */}
+
+                    {/* Comment Like Button */}
                     <div className="flex items-center space-x-4 text-xs">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleCommentLike(comment._id)}
+                        onClick={() => postApi.toggleCommentLike(post._id, comment._id).catch(console.error)}
                         className="h-6 p-1 text-muted-foreground hover:text-red-500"
+                        disabled={!user}
                       >
                         <Heart className="h-3 w-3 mr-1" />
                         <span>{comment.likes?.length || 0}</span>
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setReplyingTo(comment._id)}
-                        className="h-6 p-1 text-muted-foreground hover:text-primary"
-                      >
-                        Reply
-                      </Button>
                     </div>
-
-                    {/* Reply Form */}
-                    {replyingTo === comment._id && (
-                      <div className="mt-3 ml-4">
-                        <div className="flex space-x-2">
-                          <Textarea
-                            value={replyText}
-                            onChange={(e) => setReplyText(e.target.value)}
-                            placeholder="Write a reply..."
-                            className="flex-1 min-h-[60px] text-sm"
-                          />
-                          <div className="flex flex-col space-y-1">
-                            <Button
-                              size="sm"
-                              onClick={() => handleReply(comment._id)}
-                              disabled={!replyText.trim() || isSubmittingReply}
-                              className="h-8"
-                            >
-                              <Send className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setReplyingTo(null);
-                                setReplyText('');
-                              }}
-                              className="h-8"
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Replies */}
-                    {comment.replies && comment.replies.length > 0 && (
-                      <div className="mt-3 ml-4 space-y-2">
-                        {comment.replies.map((reply) => (
-                          <div key={reply._id} className="bg-background/50 p-2 rounded border-l-2 border-muted">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="font-medium text-xs">{reply.user.username}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(reply.createdAt), 'MMM d, h:mm a')}
-                              </span>
-                            </div>
-                            <p className="text-xs text-foreground mb-2">{reply.text}</p>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleReplyLike(comment._id, reply._id)}
-                              className="h-5 p-1 text-muted-foreground hover:text-red-500"
-                            >
-                              <Heart className="h-2 w-2 mr-1" />
-                              <span className="text-xs">{reply.likes?.length || 0}</span>
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ))
               )}
