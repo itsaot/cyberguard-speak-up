@@ -51,42 +51,64 @@ const Forum = () => {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem('cyberguard_token');
-      console.log('Forum POST - Token exists:', !!token);
+      console.log('🔑 Forum POST - Token exists:', !!token);
+      console.log('🔑 Forum POST - Token preview:', token ? `${token.substring(0, 10)}...` : 'null');
+      
+      if (!token) {
+        console.warn('⚠️ Forum POST - No token found, this might cause 401');
+      }
       
       const requestBody = {
-        content: newPost,
+        content: newPost.trim(),
         author: 'Anonymous'
       };
-      console.log('Forum POST - Request body:', requestBody);
+      console.log('📝 Forum POST - Request body:', requestBody);
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔐 Forum POST - Authorization header added');
+      }
+
+      console.log('📡 Forum POST - Headers being sent:', headers);
 
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/posts', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
+        headers,
         body: JSON.stringify(requestBody),
       });
 
-      console.log('Forum POST - Response status:', response.status);
+      console.log('📊 Forum POST - Response status:', response.status);
+      console.log('📊 Forum POST - Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Forum POST - Error response:', errorData);
-        throw new Error(`HTTP ${response.status}: ${errorData}`);
+        const errorText = await response.text();
+        console.error('❌ Forum POST - Error response body:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+          console.error('❌ Forum POST - Parsed error:', errorData);
+        } catch {
+          console.error('❌ Forum POST - Raw error text:', errorText);
+        }
+        
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
-      if (response.ok) {
-        setNewPost('');
-        setShowForm(false);
-        fetchPosts(); // Refresh posts
-        toast({
-          title: "Success",
-          description: "Your post has been shared with the community.",
-        });
-      } else {
-        throw new Error('Failed to create post');
-      }
+      const responseData = await response.json();
+      console.log('✅ Forum POST - Success response:', responseData);
+      
+      setNewPost('');
+      setShowForm(false);
+      fetchPosts(); // Refresh posts
+      toast({
+        title: "Success",
+        description: "Your post has been shared with the community.",
+      });
     } catch (error) {
       console.error('Error creating post:', error);
       toast({

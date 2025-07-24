@@ -25,52 +25,98 @@ const ReportIncident = () => {
 
     try {
       const token = localStorage.getItem('cyberguard_token');
-      console.log('Report POST - Token exists:', !!token);
+      console.log('🔑 Report POST - Token exists:', !!token);
+      console.log('🔑 Report POST - Token preview:', token ? `${token.substring(0, 10)}...` : 'null');
+      
+      if (!token) {
+        console.warn('⚠️ Report POST - No token found, this might cause 401');
+      }
+      
+      // Validate required fields before sending
+      const requiredFields = ['type', 'description', 'severity'];
+      const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+      
+      if (missingFields.length > 0) {
+        console.error('❌ Report POST - Missing required fields:', missingFields);
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
       
       const requestBody = {
-        type: formData.type,
-        location: formData.location || '',
-        description: formData.description,
-        severity: formData.severity,
+        type: formData.type.trim(),
+        location: formData.location?.trim() || '',
+        description: formData.description.trim(),
+        severity: formData.severity.trim(),
         anonymous: formData.anonymous,
         reportedAt: new Date().toISOString(),
       };
-      console.log('Report POST - Request body:', requestBody);
+      
+      console.log('📝 Report POST - Request body:', requestBody);
+      console.log('📝 Report POST - Body validation:', {
+        typeValid: !!requestBody.type,
+        descriptionValid: !!requestBody.description,
+        severityValid: !!requestBody.severity,
+        bodySize: JSON.stringify(requestBody).length
+      });
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔐 Report POST - Authorization header added');
+      }
+
+      console.log('📡 Report POST - Headers being sent:', headers);
 
       const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/reports', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
+        headers,
         body: JSON.stringify(requestBody),
       });
 
-      console.log('Report POST - Response status:', response.status);
+      console.log('📊 Report POST - Response status:', response.status);
+      console.log('📊 Report POST - Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Report POST - Error response:', errorData);
-        throw new Error(`HTTP ${response.status}: ${errorData}`);
+        const errorText = await response.text();
+        console.error('❌ Report POST - Error response body:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+          console.error('❌ Report POST - Parsed error:', errorData);
+        } catch {
+          console.error('❌ Report POST - Raw error text:', errorText);
+        }
+        
+        // Specific error handling
+        if (response.status === 400) {
+          console.error('❌ Report POST - Bad Request Details:', {
+            sentBody: requestBody,
+            possibleIssues: ['Missing required fields', 'Invalid field values', 'Wrong data types']
+          });
+        }
+        
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
-      if (response.ok) {
-        // Reset form
-        setFormData({
-          type: '',
-          location: '',
-          description: '',
-          severity: '',
-          anonymous: true,
-        });
-        
-        toast({
-          title: "Report Submitted",
-          description: "Your report has been submitted successfully. Our admin team will review it shortly.",
-        });
-      } else {
-        throw new Error('Failed to submit report');
-      }
+      const responseData = await response.json();
+      console.log('✅ Report POST - Success response:', responseData);
+      
+      // Reset form
+      setFormData({
+        type: '',
+        location: '',
+        description: '',
+        severity: '',
+        anonymous: true,
+      });
+      
+      toast({
+        title: "Report Submitted",
+        description: "Your report has been submitted successfully. Our admin team will review it shortly.",
+      });
     } catch (error) {
       console.error('Error submitting report:', error);
       toast({
