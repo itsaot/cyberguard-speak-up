@@ -150,7 +150,6 @@ const PostCard: React.FC<PostCardProps> = ({
               size="sm"
               onClick={() => onToggleLike(post._id)}
               className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
-              disabled={!user}
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
               <span>{post.likes?.length || 0}</span>
@@ -240,25 +239,23 @@ const PostCard: React.FC<PostCardProps> = ({
         {showComments && (
           <div className="mt-4 border-t pt-4">
             {/* Add Comment Form */}
-            {user && (
-              <form onSubmit={handleAddComment} className="mb-4">
-                <div className="flex space-x-2">
-                  <Textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    className="flex-1 min-h-[80px]"
-                  />
-                  <Button
-                    type="submit"
-                    disabled={!newComment.trim() || isSubmittingComment}
-                    size="sm"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </form>
-            )}
+            <form onSubmit={handleAddComment} className="mb-4">
+              <div className="flex space-x-2">
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="flex-1 min-h-[80px]"
+                />
+                <Button
+                  type="submit"
+                  disabled={!newComment.trim() || isSubmittingComment}
+                  size="sm"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </form>
 
             {/* Comments List */}
             <div className="space-y-3">
@@ -290,27 +287,25 @@ const PostCard: React.FC<PostCardProps> = ({
                     <p className="text-sm text-foreground mb-3">{comment.text}</p>
                     
                     {/* Comment Actions */}
-                    {user && (
-                      <div className="flex items-center space-x-4 text-xs">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCommentLike(comment._id)}
-                          className="h-6 p-1 text-muted-foreground hover:text-red-500"
-                        >
-                          <Heart className="h-3 w-3 mr-1" />
-                          <span>{comment.likes?.length || 0}</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setReplyingTo(comment._id)}
-                          className="h-6 p-1 text-muted-foreground hover:text-primary"
-                        >
-                          Reply
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-4 text-xs">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCommentLike(comment._id)}
+                        className="h-6 p-1 text-muted-foreground hover:text-red-500"
+                      >
+                        <Heart className="h-3 w-3 mr-1" />
+                        <span>{comment.likes?.length || 0}</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setReplyingTo(comment._id)}
+                        className="h-6 p-1 text-muted-foreground hover:text-primary"
+                      >
+                        Reply
+                      </Button>
+                    </div>
 
                     {/* Reply Form */}
                     {replyingTo === comment._id && (
@@ -359,17 +354,15 @@ const PostCard: React.FC<PostCardProps> = ({
                               </span>
                             </div>
                             <p className="text-xs text-foreground mb-2">{reply.text}</p>
-                            {user && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleReplyLike(comment._id, reply._id)}
-                                className="h-5 p-1 text-muted-foreground hover:text-red-500"
-                              >
-                                <Heart className="h-2 w-2 mr-1" />
-                                <span className="text-xs">{reply.likes?.length || 0}</span>
-                              </Button>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleReplyLike(comment._id, reply._id)}
+                              className="h-5 p-1 text-muted-foreground hover:text-red-500"
+                            >
+                              <Heart className="h-2 w-2 mr-1" />
+                              <span className="text-xs">{reply.likes?.length || 0}</span>
+                            </Button>
                           </div>
                         ))}
                       </div>
