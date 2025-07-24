@@ -50,35 +50,20 @@ const Forum = () => {
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('cyberguard_token');
-      console.log('🔑 Forum POST - Token exists:', !!token);
-      console.log('🔑 Forum POST - Token preview:', token ? `${token.substring(0, 10)}...` : 'null');
-      
-      if (!token) {
-        console.error('❌ Forum POST - No token found, cannot create post');
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to create a post.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
+      // No authentication required for forum posts
+      console.log('📝 Forum POST - Creating anonymous post');
       
       const requestBody = {
+        type: 'general', // Add missing field that backend might expect
         content: newPost.trim(),
-        author: 'Anonymous'
+        author: 'Anonymous',
+        isAnonymous: true // Add this field that backend might expect
       };
       console.log('📝 Forum POST - Request body:', requestBody);
 
-      const headers: Record<string, string> = {
+      const headers = {
         'Content-Type': 'application/json'
       };
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-        console.log('🔐 Forum POST - Authorization header added');
-      }
 
       console.log('📡 Forum POST - Headers being sent:', headers);
 

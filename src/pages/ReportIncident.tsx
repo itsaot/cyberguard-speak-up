@@ -63,21 +63,30 @@ const ReportIncident = () => {
         return;
       }
       
+      // Try different field names that the backend might expect
       const requestBody = {
-        incidentType: formData.incidentType.trim(),
+        type: formData.incidentType.trim(), // Backend might expect 'type' instead of 'incidentType'
+        incidentType: formData.incidentType.trim(), // Keep both just in case
         severity: formData.severity.trim(),
         description: formData.description.trim(),
         location: formData.location.trim(),
         date: new Date(formData.date).toISOString(),
         time: formData.time.trim(),
         reporterType: formData.reporterType.trim(),
+        reporter: formData.reporterType.trim(), // Backend might expect 'reporter' instead
         referenceId: uuidv4(),
         anonymous: formData.anonymous,
+        isAnonymous: formData.anonymous, // Backend might expect this field name
         witnesses: formData.witnesses?.trim() || '',
         evidence: formData.evidence?.trim() || '',
         contactInfo: formData.contactInfo?.trim() || '',
+        contact: formData.contactInfo?.trim() || '', // Alternative field name
         schoolNotification: formData.schoolNotification,
         parentNotification: formData.parentNotification,
+        // Additional fields that backend might expect
+        status: 'pending',
+        escalated: false,
+        reportedAt: new Date().toISOString() // Backend might expect this timestamp
       };
       
       console.log('📝 Report POST - Request body:', requestBody);
