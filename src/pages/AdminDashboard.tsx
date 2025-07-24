@@ -352,9 +352,9 @@ const AdminDashboard = () => {
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground border-t pt-3">
                       <span className="flex items-center space-x-1">
                         <MessageSquare className="h-4 w-4" />
-                        <span>{post.comments.length} comments</span>
+                        <span>{post.comments?.length || 0} comments</span>
                       </span>
-                      <span>{post.likes.length} likes</span>
+                      <span>{post.likes?.length || 0} likes</span>
                       {post.adviceRequested && (
                         <span className="text-primary font-medium">Advice Requested</span>
                       )}
