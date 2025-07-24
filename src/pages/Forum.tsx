@@ -29,7 +29,7 @@ const Forum = () => {
     author: '',
     tags: '',
     adviceRequested: false,
-    isAnonymous: false,
+    isAnonymous: true,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -119,7 +119,7 @@ const Forum = () => {
         author: '',
         tags: '',
         adviceRequested: false,
-        isAnonymous: false,
+        isAnonymous: true,
       });
 
       setShowForm(false);
@@ -204,9 +204,29 @@ const Forum = () => {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="anonymous-select">Author</Label>
+                <Select 
+                  value={newPost.isAnonymous ? "anonymous" : "named"} 
+                  onValueChange={(value) => setNewPost(prev => ({ 
+                    ...prev, 
+                    isAnonymous: value === "anonymous",
+                    author: value === "anonymous" ? "" : prev.author
+                  }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="anonymous">Anonymous</SelectItem>
+                    <SelectItem value="named">Named Author</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {!newPost.isAnonymous && (
                 <div>
-                  <Label htmlFor="author">Author *</Label>
+                  <Label htmlFor="author">Author Name *</Label>
                   <Input
                     id="author"
                     placeholder="Your name"
@@ -236,14 +256,6 @@ const Forum = () => {
                 <Label htmlFor="adviceRequested">Advice Requested</Label>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="isAnonymous"
-                  checked={newPost.isAnonymous}
-                  onCheckedChange={(checked) => setNewPost(prev => ({ ...prev, isAnonymous: checked as boolean }))}
-                />
-                <Label htmlFor="isAnonymous">Submit Anonymously</Label>
-              </div>
 
               <div className="flex justify-end space-x-2">
                 <Button
