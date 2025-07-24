@@ -8,6 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Navigate } from 'react-router-dom';
 import { AlertTriangle, Flag, Users, TrendingUp, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import stopBullyingBanner from "@/assets/stop-bullying-banner.jpg";
+import supportHands from "@/assets/support-hands.jpg";
 
 interface Report {
   id: string;
@@ -159,10 +161,23 @@ const AdminDashboard = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          Monitor reports, manage content, and oversee community activity.
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">
+              Monitor reports, manage content, and oversee community activity.
+            </p>
+          </div>
+          <img src={supportHands} alt="Support and kindness" className="h-20 w-20 rounded-lg object-cover" />
+        </div>
+        
+        {/* Banner */}
+        <div className="relative rounded-lg overflow-hidden mb-6">
+          <img src={stopBullyingBanner} alt="Stop bullying awareness banner" className="w-full h-32 object-cover" />
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <h2 className="text-white text-xl font-semibold">Together We Stop Bullying</h2>
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}
