@@ -71,23 +71,14 @@ const Forum = () => {
       return;
     }
 
-    if (!newPost.isAnonymous && !newPost.author.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Author is required unless posting anonymously.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
       const requestBody = {
         type: newPost.type,
         content: newPost.content.trim(),
-        author: newPost.isAnonymous ? "Anonymous" : newPost.author.trim(),
-        isAnonymous: newPost.isAnonymous,
+        author: "Anonymous",
+        isAnonymous: true,
         tags: newPost.tags
           .split(',')
           .map(tag => tag.trim())
@@ -203,39 +194,6 @@ const Forum = () => {
                   className="min-h-[120px]"
                 />
               </div>
-
-              <div>
-                <Label htmlFor="anonymous-select">Author</Label>
-                <Select 
-                  value={newPost.isAnonymous ? "anonymous" : "named"} 
-                  onValueChange={(value) => setNewPost(prev => ({ 
-                    ...prev, 
-                    isAnonymous: value === "anonymous",
-                    author: value === "anonymous" ? "" : prev.author
-                  }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="anonymous">Anonymous</SelectItem>
-                    <SelectItem value="named">Named Author</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {!newPost.isAnonymous && (
-                <div>
-                  <Label htmlFor="author">Author Name *</Label>
-                  <Input
-                    id="author"
-                    placeholder="Your name"
-                    value={newPost.author}
-                    onChange={(e) => setNewPost(prev => ({ ...prev, author: e.target.value }))}
-                    required={!newPost.isAnonymous}
-                  />
-                </div>
-              )}
 
               <div>
                 <Label htmlFor="tags">Tags (comma separated)</Label>
