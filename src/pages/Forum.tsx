@@ -53,11 +53,22 @@ const Forum = () => {
       // No authentication required for forum posts
       console.log('📝 Forum POST - Creating anonymous post');
       
+      // Validate content before sending
+      if (!newPost.trim()) {
+        toast({
+          title: "Error",
+          description: "Post content is required.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const requestBody = {
         content: newPost.trim(),
-        author: 'Anonymous',
-        type: 'verbal', // Use valid enum value from backend schema
+        type: 'verbal', // Must be one of: "physical", "verbal", "cyber"
         isAnonymous: true
+        // Do not send: author, createdAt (backend handles these)
       };
       console.log('📝 Forum POST - Request body:', requestBody);
 

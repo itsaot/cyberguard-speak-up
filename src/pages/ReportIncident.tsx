@@ -13,17 +13,14 @@ import { v4 as uuidv4 } from 'uuid';
 const ReportIncident = () => {
   const [formData, setFormData] = useState({
     incidentType: '',
-    severity: '',
+    platform: '',
     description: '',
-    location: '',
-    date: '',
-    reporterType: '',
-    anonymous: true,
-    witnesses: '',
+    date: new Date().toISOString().split('T')[0], // Default to today in YYYY-MM-DD format
+    severity: 'medium',
+    yourRole: '',
     evidence: '',
-    contactInfo: '',
-    schoolNotification: false,
-    parentNotification: false,
+    anonymous: true,
+    flagged: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -36,7 +33,7 @@ const ReportIncident = () => {
       // No authentication required for report submissions
       
       // Validate required fields before sending
-      const requiredFields = ['incidentType', 'severity', 'description', 'location', 'reporterType'];
+      const requiredFields = ['incidentType', 'platform', 'description', 'yourRole'];
       const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
       
       if (missingFields.length > 0) {
@@ -50,7 +47,7 @@ const ReportIncident = () => {
         return;
       }
 
-      // Validate description length
+      // Validate description length (min 10 chars)
       if (formData.description.trim().length < 10) {
         console.error('❌ Report POST - Description too short');
         toast({
@@ -61,15 +58,44 @@ const ReportIncident = () => {
         setIsSubmitting(false);
         return;
       }
+
+      // Validate yourRole enum
+      const validRoles = ['target', 'bystander', 'reporter', 'other'];
+      if (!validRoles.includes(formData.yourRole.toLowerCase())) {
+        console.error('❌ Report POST - Invalid yourRole value');
+        toast({
+          title: "Invalid Role",
+          description: "Please select a valid role.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate severity enum
+      const validSeverities = ['low', 'medium', 'high'];
+      if (!validSeverities.includes(formData.severity)) {
+        console.error('❌ Report POST - Invalid severity value');
+        toast({
+          title: "Invalid Severity",
+          description: "Please select a valid severity level.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
       
       const requestBody = {
         incidentType: formData.incidentType.trim(),
-        platform: formData.location.trim(),
+        platform: formData.platform.trim(),
         description: formData.description.trim(),
-        severity: formData.severity.trim() || 'medium',
-        yourRole: formData.reporterType.trim().toLowerCase(),
-        evidence: formData.evidence?.trim() || '',
+        date: formData.date, // YYYY-MM-DD format
+        severity: formData.severity, // 'low', 'medium', or 'high'
+        yourRole: formData.yourRole.toLowerCase(), // 'target', 'bystander', 'reporter', or 'other'
+        evidence: formData.evidence.trim() || undefined,
         anonymous: formData.anonymous,
+        flagged: formData.flagged,
+        // Do not send: timestamps (backend handles them)
       };
       
       console.log('📝 Report POST - Request body:', requestBody);
@@ -126,17 +152,14 @@ const ReportIncident = () => {
       // Reset form
       setFormData({
         incidentType: '',
-        severity: '',
+        platform: '',
         description: '',
-        location: '',
-        date: '',
-        reporterType: '',
-        anonymous: true,
-        witnesses: '',
+        date: new Date().toISOString().split('T')[0],
+        severity: 'medium',
+        yourRole: '',
         evidence: '',
-        contactInfo: '',
-        schoolNotification: false,
-        parentNotification: false,
+        anonymous: true,
+        flagged: false,
       });
       
       toast({
@@ -233,14 +256,14 @@ const ReportIncident = () => {
               </Select>
             </div>
 
-            {/* Location */}
+            {/* Platform */}
             <div className="space-y-2">
-              <Label htmlFor="location">Location *</Label>
+              <Label htmlFor="platform">Platform/Location *</Label>
               <Input
-                id="location"
-                placeholder="Where did this incident occur? (e.g., school, workplace, online)"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
+                id="platform"
+                placeholder="Where did this incident occur? (e.g., Instagram, school, workplace)"
+                value={formData.platform}
+                onChange={(e) => handleInputChange('platform', e.target.value)}
                 required
               />
             </div>
@@ -257,19 +280,17 @@ const ReportIncident = () => {
               />
             </div>
 
-            {/* Reporter Type */}
+            {/* Your Role */}
             <div className="space-y-2">
-              <Label htmlFor="reporterType">Reporter Type *</Label>
-              <Select value={formData.reporterType} onValueChange={(value) => handleInputChange('reporterType', value)}>
+              <Label htmlFor="yourRole">Your Role *</Label>
+              <Select value={formData.yourRole} onValueChange={(value) => handleInputChange('yourRole', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select reporter type" />
+                  <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="teacher">Teacher</SelectItem>
-                  <SelectItem value="parent">Parent</SelectItem>
-                  <SelectItem value="staff">Staff</SelectItem>
-                  <SelectItem value="witness">Witness</SelectItem>
+                  <SelectItem value="target">Target (I was bullied)</SelectItem>
+                  <SelectItem value="bystander">Bystander (I witnessed it)</SelectItem>
+                  <SelectItem value="reporter">Reporter (Someone told me)</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -294,16 +315,6 @@ const ReportIncident = () => {
             {/* Optional Fields */}
             <div className="space-y-4 pt-4 border-t">
               <h3 className="font-medium text-sm">Additional Information (Optional)</h3>
-              
-              <div className="space-y-2">
-                <Label htmlFor="witnesses">Witnesses</Label>
-                <Input
-                  id="witnesses"
-                  placeholder="Names or descriptions of witnesses (if any)"
-                  value={formData.witnesses}
-                  onChange={(e) => handleInputChange('witnesses', e.target.value)}
-                />
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="evidence">Evidence</Label>
@@ -313,16 +324,6 @@ const ReportIncident = () => {
                   className="min-h-[80px]"
                   value={formData.evidence}
                   onChange={(e) => handleInputChange('evidence', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactInfo">Contact Information</Label>
-                <Input
-                  id="contactInfo"
-                  placeholder="Email or phone (only if you want to be contacted)"
-                  value={formData.contactInfo}
-                  onChange={(e) => handleInputChange('contactInfo', e.target.value)}
                 />
               </div>
 
@@ -339,20 +340,11 @@ const ReportIncident = () => {
                 
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="schoolNotification"
-                    checked={formData.schoolNotification}
-                    onCheckedChange={(checked) => handleInputChange('schoolNotification', checked as boolean)}
+                    id="flagged"
+                    checked={formData.flagged}
+                    onCheckedChange={(checked) => handleInputChange('flagged', checked as boolean)}
                   />
-                  <Label htmlFor="schoolNotification" className="text-sm">Notify school administration</Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="parentNotification"
-                    checked={formData.parentNotification}
-                    onCheckedChange={(checked) => handleInputChange('parentNotification', checked as boolean)}
-                  />
-                  <Label htmlFor="parentNotification" className="text-sm">Notify parents/guardians</Label>
+                  <Label htmlFor="flagged" className="text-sm">Flag for priority review</Label>
                 </div>
               </div>
             </div>
@@ -362,7 +354,7 @@ const ReportIncident = () => {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isSubmitting || !formData.incidentType || !formData.severity || !formData.description || !formData.location || !formData.date || !formData.reporterType}
+                disabled={isSubmitting || !formData.incidentType || !formData.platform || !formData.description || !formData.yourRole || formData.description.length < 10}
               >
                 {isSubmitting ? (
                   "Submitting Report..."
