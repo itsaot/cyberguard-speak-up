@@ -36,7 +36,6 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalReports: 0,
-    pendingReports: 0,
     flaggedReports: 0,
     totalPosts: 0,
   });
@@ -72,7 +71,6 @@ const AdminDashboard = () => {
         // Calculate stats
         setStats({
           totalReports: reportsData.length,
-          pendingReports: reportsData.filter((r: Report) => r.status === 'pending').length,
           flaggedReports: reportsData.filter((r: Report) => r.flagged).length,
           totalPosts: 0, // Will be updated when posts are fetched
         });
@@ -182,7 +180,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -195,17 +193,6 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending Review</p>
-                <p className="text-2xl font-bold">{stats.pendingReports}</p>
-              </div>
-              <Eye className="h-8 w-8 text-warning" />
-            </div>
-          </CardContent>
-        </Card>
 
         <Card>
           <CardContent className="p-6">
