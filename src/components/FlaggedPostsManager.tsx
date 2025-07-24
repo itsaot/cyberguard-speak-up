@@ -161,9 +161,9 @@ const FlaggedPostsManager: React.FC = () => {
                   <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                     <span className="flex items-center space-x-1">
                       <MessageSquare className="h-4 w-4" />
-                      <span>{post.comments.length} comments</span>
+                      <span>{post.comments?.length || 0} comments</span>
                     </span>
-                    <span>{post.likes.length} likes</span>
+                    <span>{post.likes?.length || 0} likes</span>
                     {post.adviceRequested && (
                       <span className="text-primary font-medium">Advice Requested</span>
                     )}
@@ -171,11 +171,11 @@ const FlaggedPostsManager: React.FC = () => {
                 </div>
 
                 {/* Recent Comments Preview */}
-                {post.comments.length > 0 && (
+                {(post.comments?.length || 0) > 0 && (
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <h4 className="font-medium text-sm mb-2">Recent Comments:</h4>
                     <div className="space-y-2">
-                      {post.comments.slice(-2).map((comment) => (
+                      {(post.comments || []).slice(-2).map((comment) => (
                         <div key={comment._id} className="text-sm">
                           <span className="font-medium">{comment.user.username}:</span>
                           <span className="ml-2 text-muted-foreground">{comment.text}</span>

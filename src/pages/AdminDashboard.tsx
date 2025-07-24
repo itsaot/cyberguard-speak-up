@@ -27,6 +27,7 @@ interface Report {
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,9 +37,8 @@ const AdminDashboard = () => {
     totalPosts: 0,
     flaggedPosts: 0,
   });
-  const { toast } = useToast();
 
-  // Redirect if not admin
+  // Redirect if not admin - after all hooks are called
   if (!user || !user.isAdmin) {
     return <Navigate to="/login" replace />;
   }
