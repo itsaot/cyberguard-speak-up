@@ -54,10 +54,10 @@ const Forum = () => {
       console.log('📝 Forum POST - Creating anonymous post');
       
       const requestBody = {
-        type: 'general', // Add missing field that backend might expect
         content: newPost.trim(),
         author: 'Anonymous',
-        isAnonymous: true // Add this field that backend might expect
+        type: 'verbal', // Use valid enum value from backend schema
+        isAnonymous: true
       };
       console.log('📝 Forum POST - Request body:', requestBody);
 
