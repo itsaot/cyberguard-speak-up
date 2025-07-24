@@ -55,7 +55,14 @@ const Forum = () => {
       console.log('🔑 Forum POST - Token preview:', token ? `${token.substring(0, 10)}...` : 'null');
       
       if (!token) {
-        console.warn('⚠️ Forum POST - No token found, this might cause 401');
+        console.error('❌ Forum POST - No token found, cannot create post');
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to create a post.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
       }
       
       const requestBody = {
