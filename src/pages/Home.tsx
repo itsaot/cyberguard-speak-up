@@ -43,10 +43,10 @@ const Home = () => {
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-6">
-            <Shield className="h-16 w-16 text-white mr-4" />
-            <h1 className="text-5xl font-bold text-white">CyberGuard</h1>
+            <Shield className="h-16 w-16 text-primary mr-4" />
+            <h1 className="text-5xl font-bold text-foreground">CyberGuard</h1>
           </div>
-          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             A safe platform for reporting bullying incidents and finding community support. 
             Stand up, speak out, and help create safer spaces for everyone.
           </p>
@@ -96,8 +96,7 @@ const Home = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">Take Action Today</h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Whether you're experiencing bullying, witnessing it, or want to support others, 
-            CyberGuard provides the tools you need to make a difference.
+            Safely and anonymously report bullying incidents. Your report will be reviewed by our admin team.
           </p>
           
           <div className="grid md:grid-cols-2 gap-6">
@@ -112,7 +111,7 @@ const Home = () => {
               <CardContent className="text-center relative z-10">
                 <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Report an Incident</h3>
-                <p className="text-white mb-4">
+                <p className="text-black mb-4">
                   Safely and anonymously report bullying incidents. Your report will be reviewed by our admin team.
                 </p>
                 <Link to="/report">
@@ -132,7 +131,7 @@ const Home = () => {
               <CardContent className="text-center relative z-10">
                 <MessageSquare className="h-12 w-12 text-accent mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Join the Community</h3>
-                <p className="text-white mb-4">
+                <p className="text-black mb-4">
                   Connect with others, share your experiences, and find support in our community forum.
                 </p>
                 <Link to="/forum">
