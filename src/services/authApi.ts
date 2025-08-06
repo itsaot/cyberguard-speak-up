@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://srv-d29pig2dbo4c739kjurg.onrender.com/api';
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
 
 interface RegisterData {
   username: string;
@@ -61,7 +61,7 @@ export const authApi = {
   getMe: async (token: string): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
       headers: {
-        'x-auth-token': token,
+        'Authorization': `Bearer ${token}`,
       },
     });
     

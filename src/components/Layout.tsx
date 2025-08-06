@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Home, MessageSquare, AlertTriangle, LogOut, User } from 'lucide-react';
+import { Shield, Home, MessageSquare, AlertTriangle, LogOut, User, Bot } from 'lucide-react';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -11,6 +11,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Home', href: '/', icon: Home },
     { name: 'Forum', href: '/forum', icon: MessageSquare },
     { name: 'Report Incident', href: '/report', icon: AlertTriangle },
+    { name: 'Chatbot', href: '/chatbot', icon: Bot },
   ];
 
   const isActive = (path: string) => location.pathname === path;

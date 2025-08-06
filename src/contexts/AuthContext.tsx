@@ -47,9 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = async (token: string) => {
     try {
-      const response = await fetch('https://srv-d29pig2dbo4c739kjurg.onrender.com/api/auth/me', {
+      const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/me', {
         headers: {
-          'x-auth-token': token,
+          'Authorization': `Bearer ${token}`,
         },
       });
       
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Try backend authentication
-      const response = await fetch('https://srv-d29pig2dbo4c739kjurg.onrender.com/api/auth/login', {
+      const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (data: RegisterData): Promise<boolean> => {
     try {
-      const response = await fetch('https://srv-d29pig2dbo4c739kjurg.onrender.com/api/auth/register', {
+      const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

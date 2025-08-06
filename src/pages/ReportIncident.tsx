@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const ReportIncident = () => {
   const [formData, setFormData] = useState({
+    title: '',
     incidentType: '',
     platform: '',
     description: '',
@@ -151,6 +152,7 @@ const ReportIncident = () => {
       
       // Reset form
       setFormData({
+        title: '',
         incidentType: '',
         platform: '',
         description: '',

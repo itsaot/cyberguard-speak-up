@@ -1,6 +1,6 @@
 import { getAuthHeaders } from '@/utils/auth';
 
-const API_BASE_URL = 'https://srv-d29pig2dbo4c739kjurg.onrender.com/api';
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
 
 interface ChatMessage {
   message: string;

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, User, Lock } from 'lucide-react';
 
@@ -118,6 +118,11 @@ const Login = () => {
         {/* Help Text */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link to="/register" className="font-medium text-primary hover:underline">
+              Register here
+            </Link>
+            <br />
             Only authorized administrators can access this area.
             <br />
             Contact your system administrator if you need access.

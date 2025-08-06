@@ -40,14 +40,16 @@ interface CommentRequest {
 }
 
 interface CreatePostRequest {
-  type: string;
+  title: string;
   content: string;
-  tags: string[];
-  adviceRequested: boolean;
-  isAnonymous: boolean;
+  userId: string;
+  type?: string;
+  tags?: string[];
+  adviceRequested?: boolean;
+  isAnonymous?: boolean;
 }
 
-const API_BASE_URL = 'https://srv-d29pig2dbo4c739kjurg.onrender.com/api';
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
 
 export const postApi = {
   // Get all posts
@@ -177,6 +179,19 @@ export const postApi = {
     }
     
     return response.json();
+  },
+
+  // React to a post with emoji
+  reactToPost: async (postId: string, emoji: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/react`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ emoji }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to react to post');
+    }
   },
 
   // Add reply to comment

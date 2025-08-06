@@ -55,8 +55,10 @@ const Forum = () => {
 
     try {
       const postData = {
-        type: newPost.type,
+        title: newPost.content.split('\n')[0].substring(0, 100) || 'Untitled Post', // Use first line as title
         content: newPost.content.trim(),
+        userId: user?.id || 'anonymous',
+        type: newPost.type,
         tags: newPost.tags
           .split(',')
           .map(tag => tag.trim())

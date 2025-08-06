@@ -1,11 +1,13 @@
 import { getAuthHeaders } from '@/utils/auth';
 
-const API_BASE_URL = 'https://srv-d29pig2dbo4c739kjurg.onrender.com/api';
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
 
 interface ReportData {
-  type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
   description: string;
+  type: string;
+  userId: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
   location?: string;
   platform?: string;
   evidence?: string;
@@ -15,6 +17,7 @@ interface ReportData {
 
 interface Report {
   _id: string;
+  title: string;
   type: string;
   severity: string;
   description: string;
@@ -92,16 +95,55 @@ export const reportsApi = {
     }
   },
 
-  // Add reaction to report
+  // React to a report with emoji
   reactToReport: async (reportId: string, emoji: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/reports/${reportId}/react`, {
-      method: 'POST',
+      method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify({ emoji }),
     });
     
     if (!response.ok) {
       throw new Error('Failed to react to report');
+    }
+  },
+
+  // Get flagged reports (admin only)
+  getFlaggedReports: async (): Promise<Report[]> => {
+    const response = await fetch(`${API_BASE_URL}/reports/flagged`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch flagged reports');
+    }
+    
+    return response.json();
+  },
+
+  // Get single report
+  getReport: async (reportId: string): Promise<Report> => {
+    const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch report');
+    }
+    
+    return response.json();
+  },
+
+  // Update report progress/status
+  updateReportProgress: async (reportId: string, message: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/reports/${reportId}/progress`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ message }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to update report progress');
     }
   },
 
