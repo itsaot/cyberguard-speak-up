@@ -9,7 +9,9 @@ import Home from "./pages/Home";
 import Forum from "./pages/Forum";
 import ReportIncident from "./pages/ReportIncident";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
+import Chatbot from "./pages/Chatbot";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +29,9 @@ const App = () => (
               <Route path="/forum" element={<Forum />} />
               <Route path="/report" element={<ReportIncident />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/chatbot" element={<Chatbot />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

@@ -47,7 +47,7 @@ interface CreatePostRequest {
   isAnonymous: boolean;
 }
 
-const API_BASE_URL = 'https://cybergaurd-backend-2.onrender.com/api';
+const API_BASE_URL = 'https://srv-d29pig2dbo4c739kjurg.onrender.com/api';
 
 export const postApi = {
   // Get all posts
