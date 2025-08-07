@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,7 @@ import Forum from "./pages/Forum";
 import ReportIncident from "./pages/ReportIncident";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Chatbot from "./pages/Chatbot";
 import NotFound from "./pages/NotFound";
@@ -30,6 +32,7 @@ const App = () => (
               <Route path="/report" element={<ReportIncident />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/chatbot" element={<Chatbot />} />
               <Route path="*" element={<NotFound />} />

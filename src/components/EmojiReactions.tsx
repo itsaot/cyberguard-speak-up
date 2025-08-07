@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -14,7 +15,7 @@ interface EmojiReactionsProps {
   disabled?: boolean;
 }
 
-const EMOJI_OPTIONS = ['👍', '❤️', '😢', '😡', '🤗', '💪', '🙏', '✨'];
+const EMOJI_OPTIONS = ['👍', '❤️', '😢', '😡', '🤗', '💪', '🙏', '✨', '😞', '💔', '🫂', '😔'];
 
 const EmojiReactions = ({ reactions, onReact, disabled = false }: EmojiReactionsProps) => {
   const [isReacting, setIsReacting] = useState(false);

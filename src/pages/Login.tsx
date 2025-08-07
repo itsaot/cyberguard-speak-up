@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +30,7 @@ const Login = () => {
           title: "Login Successful",
           description: "Welcome back!",
         });
-        // AuthContext will handle navigation based on user role
+        navigate('/');
       } else {
         toast({
           title: "Login Failed",

@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
   id: string;
   username: string;
+  email?: string;
   isAdmin: boolean;
 }
 
@@ -12,6 +14,7 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  updateProfile: (data: Partial<User>) => Promise<boolean>;
 }
 
 interface RegisterData {
@@ -93,12 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = await response.json();
         localStorage.setItem('cyberguard_token', data.token);
         setUser(data.user);
-        // Navigate based on user role
-        if (data.user.isAdmin) {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/forum';
-        }
         return true;
       }
       return false;
@@ -131,13 +128,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfile = async (data: Partial<User>): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem('cyberguard_token');
+      if (!token) return false;
+
+      const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUser(updatedUser);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Profile update error:', error);
+      return false;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('cyberguard_token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

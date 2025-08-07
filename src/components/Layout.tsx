@@ -1,7 +1,8 @@
+
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Home, MessageSquare, AlertTriangle, LogOut, User, Bot } from 'lucide-react';
+import { Shield, Home, MessageSquare, AlertTriangle, LogOut, User, Bot, Settings } from 'lucide-react';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -50,13 +51,27 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="flex items-center space-x-4">
               {user ? (
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground">
-                    Welcome, {user.username}
-                  </span>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground font-medium">
+                      {user.username}
+                    </span>
+                    {user.isAdmin && (
+                      <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                  <Link to="/profile">
+                    <Button variant="outline" size="sm">
+                      <Settings className="h-4 w-4 mr-1" />
+                      Profile
+                    </Button>
+                  </Link>
                   {user.isAdmin && (
                     <Link to="/admin">
                       <Button variant="outline" size="sm">
-                        <User className="h-4 w-4 mr-1" />
+                        <Shield className="h-4 w-4 mr-1" />
                         Admin
                       </Button>
                     </Link>
