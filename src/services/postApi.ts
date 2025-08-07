@@ -161,7 +161,13 @@ export const postApi = {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to fetch flagged posts');
+      if (response.status === 401) {
+        throw new Error('Unauthorized: Admin access required');
+      }
+      if (response.status === 404) {
+        throw new Error('Flagged posts endpoint not found');
+      }
+      throw new Error(`Failed to fetch flagged posts: ${response.status}`);
     }
     
     return response.json();

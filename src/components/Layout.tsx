@@ -50,6 +50,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="flex items-center space-x-4">
               {user ? (
                 <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground">
+                    Welcome, {user.username}
+                  </span>
                   {user.isAdmin && (
                     <Link to="/admin">
                       <Button variant="outline" size="sm">
@@ -64,12 +67,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </Button>
                 </div>
               ) : (
-                <Link to="/login">
-                  <Button variant="outline" size="sm">
-                    <User className="h-4 w-4 mr-1" />
-                    Admin Login
-                  </Button>
-                </Link>
+                <div className="flex items-center space-x-2">
+                  <Link to="/login">
+                    <Button variant="outline" size="sm">
+                      <User className="h-4 w-4 mr-1" />
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm">
+                      Register
+                    </Button>
+                  </Link>
+                </div>
               )}
             </div>
           </div>

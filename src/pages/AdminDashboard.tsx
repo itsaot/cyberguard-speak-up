@@ -52,7 +52,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('cyberguard_token');
       
       // Fetch reports
-      const reportsResponse = await fetch('https://cybergaurd-backend-2.onrender.com/api/reports', {
+      const reportsResponse = await fetch('https://cybergaurdapi.onrender.com/api/reports', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -92,7 +92,7 @@ const AdminDashboard = () => {
   const handleFlagReport = async (reportId: string) => {
     try {
       const token = localStorage.getItem('cyberguard_token');
-      const response = await fetch(`https://cybergaurd-backend-2.onrender.com/api/reports/${reportId}/flag`, {
+      const response = await fetch(`https://cybergaurdapi.onrender.com/api/reports/${reportId}/flag`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
