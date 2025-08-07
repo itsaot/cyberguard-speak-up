@@ -27,9 +27,9 @@ const Login = () => {
       if (success) {
         toast({
           title: "Login Successful",
-          description: "Welcome back, admin!",
+          description: "Welcome back!",
         });
-        navigate('/admin');
+        // AuthContext will handle navigation based on user role
       } else {
         toast({
           title: "Login Failed",
@@ -57,9 +57,9 @@ const Login = () => {
             <Shield className="h-12 w-12 text-primary mr-3" />
             <h1 className="text-3xl font-bold text-foreground">CyberGuard</h1>
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Admin Login</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Login</h2>
           <p className="text-muted-foreground">
-            Access the admin dashboard to manage reports and moderate content.
+            Sign in to access your account and manage reports.
           </p>
         </div>
 
@@ -68,7 +68,7 @@ const Login = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <User className="h-5 w-5" />
-              <span>Administrator Access</span>
+              <span>Sign In</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -78,7 +78,7 @@ const Login = () => {
                 <Input
                   id="username"
                   type="text"
-                  placeholder="Enter admin username"
+                  placeholder="Enter username"
                   value={credentials.username}
                   onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                   required
@@ -90,7 +90,7 @@ const Login = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter admin password"
+                  placeholder="Enter password"
                   value={credentials.password}
                   onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
                   required
@@ -120,12 +120,12 @@ const Login = () => {
           <p className="text-sm text-muted-foreground">
             Don't have an account?{' '}
             <Link to="/register" className="font-medium text-primary hover:underline">
-              Register here
+              Register as Student
             </Link>
             <br />
-            Only authorized administrators can access this area.
-            <br />
-            Contact your system administrator if you need access.
+            <span className="text-xs">
+              Admin access requires preset credentials.
+            </span>
           </p>
         </div>
       </div>

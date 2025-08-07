@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +15,6 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student' as 'student' | 'admin',
   });
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
@@ -50,7 +49,6 @@ const Register = () => {
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
       });
 
       if (success) {
@@ -58,7 +56,7 @@ const Register = () => {
           title: "Registration Successful",
           description: "Welcome to CyberGuard!",
         });
-        navigate(formData.role === 'admin' ? '/admin' : '/forum');
+        navigate('/forum');
       } else {
         toast({
           title: "Registration Failed",
@@ -86,9 +84,9 @@ const Register = () => {
             <Shield className="h-12 w-12 text-primary mr-3" />
             <h1 className="text-3xl font-bold text-foreground">CyberGuard</h1>
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Create Account</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Create Student Account</h2>
           <p className="text-muted-foreground">
-            Join our community to report incidents and support each other.
+            Join our community to report incidents and support each other. Students only - admins login with preset credentials.
           </p>
         </div>
 
@@ -166,18 +164,6 @@ const Register = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="role">Account Type</Label>
-                <Select value={formData.role} onValueChange={(value: 'student' | 'admin') => setFormData(prev => ({ ...prev, role: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select account type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="admin">Administrator</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               <Button 
                 type="submit" 
