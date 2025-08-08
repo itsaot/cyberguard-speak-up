@@ -11,6 +11,11 @@ interface PostResponse {
   createdBy: string;
   createdAt: string;
   likes: string[];
+  reactions?: Array<{
+    emoji: string;
+    userId: string;
+    username: string;
+  }>;
   comments: Array<{
     _id: string;
     user: {

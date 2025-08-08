@@ -49,6 +49,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = async (token: string) => {
     try {
+      // Handle dev admin token
+      if (token === 'dev-admin-token') {
+        const adminUser = {
+          id: "admin-001",
+          username: "admin",
+          isAdmin: true
+        };
+        setUser(adminUser);
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -56,7 +68,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (response.ok) {
-        const userData = await response.json();
+        const data = await response.json();
+        
+        // Map backend user data to our User interface
+        const userData = {
+          id: data.id || data._id,
+          username: data.username,
+          email: data.email,
+          isAdmin: data.isAdmin || data.role === 'admin'
+        };
+        
         setUser(userData);
       } else {
         localStorage.removeItem('cyberguard_token');
@@ -71,6 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
+      setIsLoading(true);
+      
       // Temporary hardcoded admin credentials for development
       if (username === "admin" && password === "admin123") {
         const adminUser = {
@@ -80,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         localStorage.setItem('cyberguard_token', 'dev-admin-token');
         setUser(adminUser);
+        setIsLoading(false);
         return true;
       }
 
@@ -95,12 +119,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('cyberguard_token', data.token);
-        setUser(data.user);
+        
+        // Map backend user data to our User interface
+        const userData = {
+          id: data.user.id || data.user._id,
+          username: data.user.username,
+          email: data.user.email,
+          isAdmin: data.user.isAdmin || data.user.role === 'admin'
+        };
+        
+        setUser(userData);
+        setIsLoading(false);
         return true;
       }
+      setIsLoading(false);
       return false;
     } catch (error) {
       console.error('Login error:', error);
+      setIsLoading(false);
       return false;
     }
   };

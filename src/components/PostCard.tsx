@@ -8,6 +8,7 @@ import { Heart, MessageSquare, Flag, Trash2, Send, ChevronDown, ChevronUp } from
 import { format } from 'date-fns';
 import { PostResponse, postApi } from '@/services/postApi';
 import { useAuth } from '@/contexts/AuthContext';
+import EmojiReactions from '@/components/EmojiReactions';
 
 interface PostCardProps {
   post: PostResponse;
@@ -94,6 +95,15 @@ const PostCard: React.FC<PostCardProps> = ({
     }
   };
 
+  const handleEmojiReaction = async (emoji: string) => {
+    try {
+      if (!user) return;
+      await postApi.reactToPost(post._id, emoji);
+    } catch (error) {
+      console.error('Failed to add reaction:', error);
+    }
+  };
+
   const canDeleteComment = (commentUserId: string) => {
     return isAdmin || (user && user.id === commentUserId);
   };
@@ -142,6 +152,16 @@ const PostCard: React.FC<PostCardProps> = ({
           </div>
         )}
 
+        {/* Emoji Reactions */}
+        {user && (
+          <div className="mb-4">
+            <EmojiReactions
+              reactions={post.reactions || []}
+              onReact={handleEmojiReaction}
+            />
+          </div>
+        )}
+
         {/* Post Actions */}
         <div className="flex items-center justify-between border-t pt-4">
           <div className="flex items-center space-x-4">
@@ -151,6 +171,7 @@ const PostCard: React.FC<PostCardProps> = ({
               size="sm"
               onClick={() => onToggleLike(post._id, user?.id)}
               className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
+              disabled={!user}
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
               <span>{post.likes?.length || 0}</span>
