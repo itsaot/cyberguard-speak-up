@@ -11,6 +11,11 @@ interface PostResponse {
   createdBy: string;
   createdAt: string;
   likes: string[];
+  reactions?: Array<{
+    emoji: string;
+    userId: string;
+    username: string;
+  }>;
   comments: Array<{
     _id: string;
     user: {
@@ -82,15 +87,9 @@ export const postApi = {
 
   // Like/unlike a post
   toggleLike: async (postId: string, userId?: string): Promise<{ liked: boolean; likesCount: number }> => {
-    // Generate a default userId if none provided (for anonymous users)
-    const userIdToSend = userId || `anonymous-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId: userIdToSend }),
+      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
@@ -104,9 +103,7 @@ export const postApi = {
   addComment: async (postId: string, commentData: CommentRequest): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(commentData),
     });
     
@@ -190,7 +187,7 @@ export const postApi = {
   // React to a post with emoji
   reactToPost: async (postId: string, emoji: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/react`, {
-      method: 'PATCH',
+      method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ emoji }),
     });
@@ -204,9 +201,7 @@ export const postApi = {
   addCommentReply: async (postId: string, commentId: string, userId: string, text: string): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ userId, text }),
     });
     

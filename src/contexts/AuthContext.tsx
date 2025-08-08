@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = async (token: string) => {
     try {
-      const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/me', {
+      const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/user', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

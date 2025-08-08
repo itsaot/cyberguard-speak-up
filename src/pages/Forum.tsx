@@ -24,6 +24,7 @@ const Forum = () => {
     deleteComment,
     flagPost,
     deletePost,
+    reactToPost,
   } = usePosts();
 
   const [newPost, setNewPost] = useState({
@@ -235,6 +236,7 @@ const Forum = () => {
               onDeleteComment={deleteComment}
               onFlagPost={flagPost}
               onDeletePost={deletePost}
+              onReact={reactToPost}
             />
           ))
         )}

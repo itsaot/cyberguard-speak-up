@@ -147,6 +147,26 @@ export const usePosts = () => {
     }
   };
 
+  const reactToPost = async (postId: string, emoji: string) => {
+    try {
+      await postApi.reactToPost(postId, emoji);
+      
+      // Refetch posts to get updated reactions
+      await fetchPosts();
+      
+      toast({
+        title: "Reaction added",
+        description: `Reacted with ${emoji}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add reaction.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     posts,
     isLoading,
@@ -156,5 +176,6 @@ export const usePosts = () => {
     deleteComment,
     flagPost,
     deletePost,
+    reactToPost,
   };
 };

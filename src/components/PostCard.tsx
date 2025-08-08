@@ -8,6 +8,7 @@ import { Heart, MessageSquare, Flag, Trash2, Send, ChevronDown, ChevronUp } from
 import { format } from 'date-fns';
 import { PostResponse, postApi } from '@/services/postApi';
 import { useAuth } from '@/contexts/AuthContext';
+import EmojiReactions from '@/components/EmojiReactions';
 
 interface PostCardProps {
   post: PostResponse;
@@ -16,6 +17,7 @@ interface PostCardProps {
   onDeleteComment: (postId: string, commentId: string) => void;
   onFlagPost: (postId: string, reason: string) => void;
   onDeletePost: (postId: string) => void;
+  onReact?: (postId: string, emoji: string) => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -25,6 +27,7 @@ const PostCard: React.FC<PostCardProps> = ({
   onDeleteComment,
   onFlagPost,
   onDeletePost,
+  onReact,
 }) => {
   const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
@@ -94,6 +97,18 @@ const PostCard: React.FC<PostCardProps> = ({
     }
   };
 
+  const handleEmojiReact = async (emoji: string) => {
+    try {
+      await postApi.reactToPost(post._id, emoji);
+      // Optionally call onReact if provided to update parent state
+      if (onReact) {
+        onReact(post._id, emoji);
+      }
+    } catch (error) {
+      console.error('Failed to react to post:', error);
+    }
+  };
+
   const canDeleteComment = (commentUserId: string) => {
     return isAdmin || (user && user.id === commentUserId);
   };
@@ -128,6 +143,17 @@ const PostCard: React.FC<PostCardProps> = ({
 
         {/* Post Content */}
         <p className="text-foreground whitespace-pre-wrap mb-4">{post.content}</p>
+
+        {/* Emoji Reactions */}
+        {user && (
+          <div className="mb-4">
+            <EmojiReactions
+              reactions={post.reactions || []}
+              onReact={handleEmojiReact}
+              disabled={false}
+            />
+          </div>
+        )}
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
