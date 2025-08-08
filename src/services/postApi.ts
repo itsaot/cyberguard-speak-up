@@ -11,11 +11,6 @@ interface PostResponse {
   createdBy: string;
   createdAt: string;
   likes: string[];
-  reactions?: Array<{
-    emoji: string;
-    userId: string;
-    username: string;
-  }>;
   comments: Array<{
     _id: string;
     user: {
@@ -37,7 +32,6 @@ interface PostResponse {
     }>;
   }>;
   flagged: boolean;
-  deletedForUser?: boolean;
 }
 
 interface CommentRequest {
@@ -196,7 +190,7 @@ export const postApi = {
   // React to a post with emoji
   reactToPost: async (postId: string, emoji: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/react`, {
-      method: 'POST',
+      method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify({ emoji }),
     });

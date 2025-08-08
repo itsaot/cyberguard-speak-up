@@ -226,19 +226,17 @@ const Forum = () => {
             </CardContent>
           </Card>
         ) : (
-          posts
-            .filter(post => user?.isAdmin || !post.deletedForUser)
-            .map((post) => (
-              <PostCard
-                key={post._id}
-                post={post}
-                onToggleLike={toggleLike}
-                onAddComment={addComment}
-                onDeleteComment={deleteComment}
-                onFlagPost={flagPost}
-                onDeletePost={deletePost}
-              />
-            ))
+          posts.map((post) => (
+            <PostCard
+              key={post._id}
+              post={post}
+              onToggleLike={toggleLike}
+              onAddComment={addComment}
+              onDeleteComment={deleteComment}
+              onFlagPost={flagPost}
+              onDeletePost={deletePost}
+            />
+          ))
         )}
       </div>
     </div>
