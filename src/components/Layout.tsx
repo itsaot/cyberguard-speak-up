@@ -62,12 +62,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       </span>
                     )}
                   </div>
-                  <Link to="/profile">
-                    <Button variant="outline" size="sm">
-                      <Settings className="h-4 w-4 mr-1" />
-                      Profile
-                    </Button>
-                  </Link>
+                  {!user.isAdmin && (
+                    <Link to="/profile">
+                      <Button variant="outline" size="sm">
+                        <Settings className="h-4 w-4 mr-1" />
+                        Profile
+                      </Button>
+                    </Link>
+                  )}
                   {user.isAdmin && (
                     <Link to="/admin">
                       <Button variant="outline" size="sm">
