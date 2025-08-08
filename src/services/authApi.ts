@@ -58,8 +58,8 @@ export const authApi = {
     return response.json();
   },
 
-  getMe: async (token: string): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+  getUser: async (token: string): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/auth/user`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
