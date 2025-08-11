@@ -4,7 +4,6 @@ export const getAuthToken = (): string | null => {
 
 export const getAuthHeaders = () => {
   const token = getAuthToken();
-  console.log('Getting auth headers, token exists:', !!token);
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` }),

@@ -49,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = async (token: string) => {
     try {
+      console.log('Fetching user with token from context');
       const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/user', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -57,12 +58,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (response.ok) {
         const userData = await response.json();
+        console.log('User data fetched successfully:', userData);
         // Ensure isAdmin is always defined
         setUser({
           ...userData,
           isAdmin: userData.isAdmin || false
         });
       } else {
+        console.error('Failed to fetch user, status:', response.status);
         localStorage.removeItem('cyberguard_token');
       }
     } catch (error) {

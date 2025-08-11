@@ -25,6 +25,7 @@ interface AuthResponse {
 
 export const authApi = {
   register: async (data: RegisterData): Promise<AuthResponse> => {
+    console.log('Attempting registration with:', { username: data.username, email: data.email });
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: {
@@ -34,14 +35,22 @@ export const authApi = {
     });
     
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || 'Registration failed');
+      let errorMessage = 'Registration failed';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.msg || errorData.message || 'Registration failed';
+      } catch {
+        errorMessage = await response.text();
+      }
+      console.error('Registration error:', errorMessage);
+      throw new Error(errorMessage);
     }
     
     return response.json();
   },
 
   login: async (data: LoginData): Promise<AuthResponse> => {
+    console.log('Attempting login with username:', data.username);
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -51,21 +60,30 @@ export const authApi = {
     });
     
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || 'Login failed');
+      let errorMessage = 'Login failed';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.msg || errorData.message || 'Invalid credentials';
+      } catch {
+        errorMessage = await response.text();
+      }
+      console.error('Login error:', errorMessage);
+      throw new Error(errorMessage);
     }
     
     return response.json();
   },
 
-  getMe: async (token: string): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+  getUser: async (token: string): Promise<any> => {
+    console.log('Fetching user data with token');
+    const response = await fetch(`${API_BASE_URL}/auth/user`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
     
     if (!response.ok) {
+      console.error('Failed to get user data, status:', response.status);
       throw new Error('Failed to get user data');
     }
     
