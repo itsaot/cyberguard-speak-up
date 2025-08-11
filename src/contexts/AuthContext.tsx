@@ -57,7 +57,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData);
+        // Ensure isAdmin is always defined
+        setUser({
+          ...userData,
+          isAdmin: userData.isAdmin || false
+        });
       } else {
         localStorage.removeItem('cyberguard_token');
       }
@@ -95,7 +99,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('cyberguard_token', data.token);
-        setUser(data.user);
+        // Ensure isAdmin is always defined
+        setUser({
+          ...data.user,
+          isAdmin: data.user.isAdmin || false
+        });
         return true;
       }
       return false;
@@ -118,7 +126,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         const authData = await response.json();
         localStorage.setItem('cyberguard_token', authData.token);
-        setUser(authData.user);
+        // Ensure isAdmin is always defined
+        setUser({
+          ...authData.user,
+          isAdmin: authData.user.isAdmin || false
+        });
         return true;
       }
       return false;
