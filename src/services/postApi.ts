@@ -85,15 +85,24 @@ export const postApi = {
     return response.json();
   },
 
-  // Like/unlike a post
+  // Like/unlike a post - matches backend route /:postId/like
   toggleLike: async (postId: string, userId?: string): Promise<{ liked: boolean; likesCount: number }> => {
+    console.log('Attempting to toggle like for post:', postId);
+    const headers = getAuthHeaders();
+    console.log('Headers being sent:', headers);
+    
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers,
+      body: JSON.stringify({}), // Backend might expect empty body
     });
     
+    console.log('Like response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error('Failed to toggle like');
+      const errorText = await response.text();
+      console.error('Like error response:', errorText);
+      throw new Error(`Failed to toggle like: ${response.status} - ${errorText}`);
     }
     
     return response.json();
@@ -101,14 +110,22 @@ export const postApi = {
 
   // Add a comment to a post
   addComment: async (postId: string, commentData: CommentRequest): Promise<any> => {
+    console.log('Attempting to add comment to post:', postId, 'data:', commentData);
+    const headers = getAuthHeaders();
+    console.log('Headers being sent:', headers);
+    
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers,
       body: JSON.stringify(commentData),
     });
     
+    console.log('Comment response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error('Failed to add comment');
+      const errorText = await response.text();
+      console.error('Comment error response:', errorText);
+      throw new Error(`Failed to add comment: ${response.status} - ${errorText}`);
     }
     
     return response.json();
@@ -129,7 +146,7 @@ export const postApi = {
   // Flag a post
   flagPost: async (postId: string, reason: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/flag`, {
-      method: 'PATCH',
+      method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ reason }),
     });
@@ -184,7 +201,7 @@ export const postApi = {
     return response.json();
   },
 
-  // React to a post with emoji
+  // React to a post with emoji - matches backend route /:id/react
   reactToPost: async (postId: string, emoji: string): Promise<void> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/react`, {
       method: 'POST',
@@ -197,7 +214,7 @@ export const postApi = {
     }
   },
 
-  // Add reply to comment
+  // Add reply to comment - matches backend route /:postId/comments/:commentId/replies
   addCommentReply: async (postId: string, commentId: string, userId: string, text: string): Promise<any> => {
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
