@@ -148,7 +148,7 @@ const PostCard: React.FC<PostCardProps> = ({
         {user && (
           <div className="mb-4">
             <EmojiReactions
-              reactions={post.reactions || []}
+              reactions={Array.isArray(post.reactions) ? post.reactions : []}
               onReact={handleEmojiReact}
               disabled={false}
             />

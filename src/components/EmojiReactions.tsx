@@ -43,10 +43,17 @@ const EmojiReactions = ({ reactions, onReact, disabled = false }: EmojiReactions
   };
 
   const getReactionCount = (emoji: string) => {
+    if (!Array.isArray(reactions)) {
+      console.warn('Reactions is not an array:', reactions);
+      return 0;
+    }
     return reactions.filter(r => r.emoji === emoji).length;
   };
 
   const hasUserReacted = (emoji: string) => {
+    if (!Array.isArray(reactions)) {
+      return false;
+    }
     // For now, we'll just check if there are any reactions with this emoji
     // In a real app, you'd check against the current user's ID
     return reactions.some(r => r.emoji === emoji);
