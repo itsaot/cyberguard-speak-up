@@ -1,5 +1,5 @@
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('cyberguard_token');
+  return localStorage.getItem('accessToken');
 };
 
 export const getAuthHeaders = () => {
@@ -19,15 +19,14 @@ export const refreshToken = async (): Promise<string | null> => {
     
     if (response.ok) {
       const data = await response.json();
-      const newToken = data.accessToken || data.token;
-      localStorage.setItem('cyberguard_token', newToken);
-      return newToken;
+      localStorage.setItem('accessToken', data.accessToken);
+      return data.accessToken;
     }
   } catch (error) {
     console.error('Token refresh failed:', error);
   }
   
-  localStorage.removeItem('cyberguard_token');
+  localStorage.removeItem('accessToken');
   return null;
 };
 

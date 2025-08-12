@@ -4,7 +4,6 @@ interface RegisterData {
   username: string;
   email: string;
   password: string;
-  role?: 'student' | 'admin';
 }
 
 interface LoginData {
@@ -13,80 +12,89 @@ interface LoginData {
 }
 
 interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    username: string;
-    email: string;
-    role: string;
-    isAdmin: boolean;
-  };
+  accessToken: string;
 }
 
+// Helper functions for token management
+const saveAccessToken = (token: string) => localStorage.setItem("accessToken", token);
+const getAccessToken = () => localStorage.getItem("accessToken");
+
 export const authApi = {
-  register: async (data: RegisterData): Promise<AuthResponse> => {
-    console.log('Attempting registration with:', { username: data.username, email: data.email });
+  register: async (data: RegisterData): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify(data),
     });
     
     if (!response.ok) {
-      let errorMessage = 'Registration failed';
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.msg || errorData.message || 'Registration failed';
-      } catch {
-        errorMessage = await response.text();
-      }
-      console.error('Registration error:', errorMessage);
-      throw new Error(errorMessage);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.msg || 'Registration failed');
     }
     
-    return response.json();
+    const result = await response.json();
+    saveAccessToken(result.accessToken);
+    return result.accessToken;
   },
 
-  login: async (data: LoginData): Promise<AuthResponse> => {
-    console.log('Attempting login with username:', data.username);
+  login: async (data: LoginData): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify(data),
     });
     
     if (!response.ok) {
-      let errorMessage = 'Login failed';
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.msg || errorData.message || 'Invalid credentials';
-      } catch {
-        errorMessage = await response.text();
-      }
-      console.error('Login error:', errorMessage);
-      throw new Error(errorMessage);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.msg || 'Login failed');
     }
     
-    return response.json();
+    const result = await response.json();
+    saveAccessToken(result.accessToken);
+    return result.accessToken;
   },
 
-  refreshToken: async (): Promise<{ accessToken: string }> => {
+  refreshAccessToken: async (): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     });
     
     if (!response.ok) {
-      throw new Error('Token refresh failed');
+      throw new Error('Could not refresh token');
     }
     
-    return response.json();
+    const data = await response.json();
+    saveAccessToken(data.accessToken);
+    return data.accessToken;
+  },
+
+  fetchCurrentUser: async (): Promise<any> => {
+    let token = getAccessToken();
+    if (!token) throw new Error('No access token');
+
+    let response = await fetch(`${API_BASE_URL}/auth/user`, {
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
+    });
+
+    // If token expired, try refreshing
+    if (response.status === 401) {
+      try {
+        token = await authApi.refreshAccessToken();
+        response = await fetch(`${API_BASE_URL}/auth/user`, {
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
+        });
+      } catch {
+        throw new Error('Authentication failed');
+      }
+    }
+
+    if (!response.ok) throw new Error('Failed to fetch user');
+    return await response.json();
   },
 
   logout: async (): Promise<void> => {
@@ -94,24 +102,10 @@ export const authApi = {
       method: 'POST',
       credentials: 'include',
     });
+    localStorage.removeItem('accessToken');
   },
 
-  getUser: async (token: string): Promise<any> => {
-    console.log('Fetching user data with token');
-    const response = await fetch(`${API_BASE_URL}/auth/user`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      credentials: 'include',
-    });
-    
-    if (!response.ok) {
-      console.error('Failed to get user data, status:', response.status);
-      throw new Error('Failed to get user data');
-    }
-    
-    return response.json();
-  },
+  getAccessToken,
 };
 
 export type { RegisterData, LoginData, AuthResponse };
