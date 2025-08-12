@@ -54,12 +54,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
       
       if (response.ok) {
         const userData = await response.json();
         console.log('User data fetched successfully:', userData);
-        // Ensure isAdmin is always defined
         setUser({
           ...userData,
           isAdmin: userData.isAdmin || false
@@ -96,14 +96,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('cyberguard_token', data.token);
+        localStorage.setItem('cyberguard_token', data.accessToken || data.token);
         // Fetch user data after storing token
-        await fetchUser(data.token);
+        await fetchUser(data.accessToken || data.token);
         return true;
       }
       return false;
@@ -120,14 +121,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
       if (response.ok) {
         const authData = await response.json();
-        localStorage.setItem('cyberguard_token', authData.token);
+        localStorage.setItem('cyberguard_token', authData.accessToken || authData.token);
         // Fetch user data after storing token
-        await fetchUser(authData.token);
+        await fetchUser(authData.accessToken || authData.token);
         return true;
       }
       return false;
@@ -148,6 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -163,9 +166,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('cyberguard_token');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await fetch('https://cybergaurdapi.onrender.com/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('cyberguard_token');
+      setUser(null);
+    }
   };
 
   return (

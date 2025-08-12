@@ -31,6 +31,7 @@ export const authApi = {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     
@@ -56,6 +57,7 @@ export const authApi = {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     
@@ -74,12 +76,33 @@ export const authApi = {
     return response.json();
   },
 
+  refreshToken: async (): Promise<{ accessToken: string }> => {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Token refresh failed');
+    }
+    
+    return response.json();
+  },
+
+  logout: async (): Promise<void> => {
+    await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+  },
+
   getUser: async (token: string): Promise<any> => {
     console.log('Fetching user data with token');
     const response = await fetch(`${API_BASE_URL}/auth/user`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
     });
     
     if (!response.ok) {

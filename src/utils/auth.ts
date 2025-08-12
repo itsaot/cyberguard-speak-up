@@ -10,6 +10,58 @@ export const getAuthHeaders = () => {
   };
 };
 
+export const refreshToken = async (): Promise<string | null> => {
+  try {
+    const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const newToken = data.accessToken || data.token;
+      localStorage.setItem('cyberguard_token', newToken);
+      return newToken;
+    }
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+  }
+  
+  localStorage.removeItem('cyberguard_token');
+  return null;
+};
+
+export const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const token = getAuthToken();
+  
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+    credentials: 'include',
+  });
+  
+  // If we get a 401, try to refresh the token
+  if (response.status === 401 && token) {
+    const newToken = await refreshToken();
+    if (newToken) {
+      // Retry the request with the new token
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Authorization': `Bearer ${newToken}`,
+        },
+        credentials: 'include',
+      });
+    }
+  }
+  
+  return response;
+};
+
 export const isAuthenticated = (): boolean => {
   return !!getAuthToken();
 };

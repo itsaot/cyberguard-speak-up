@@ -1,4 +1,4 @@
-import { getAuthHeaders } from '@/utils/auth';
+import { authenticatedFetch } from '@/utils/auth';
 
 interface PostResponse {
   _id: string;
@@ -60,7 +60,7 @@ export const postApi = {
   // Get all posts
   getPosts: async (): Promise<PostResponse[]> => {
     const response = await fetch(`${API_BASE_URL}/posts`, {
-      headers: getAuthHeaders(),
+      credentials: 'include',
     });
     
     if (!response.ok) {
@@ -72,9 +72,11 @@ export const postApi = {
 
   // Create a new post
   createPost: async (postData: CreatePostRequest): Promise<PostResponse> => {
-    const response = await fetch(`${API_BASE_URL}/posts`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(postData),
     });
     
@@ -88,12 +90,12 @@ export const postApi = {
   // Like/unlike a post - matches backend route /:postId/like
   toggleLike: async (postId: string, userId?: string): Promise<{ liked: boolean; likesCount: number }> => {
     console.log('Attempting to toggle like for post:', postId);
-    const headers = getAuthHeaders();
-    console.log('Headers being sent:', headers);
     
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({}), // Backend might expect empty body
     });
     
@@ -111,12 +113,12 @@ export const postApi = {
   // Add a comment to a post
   addComment: async (postId: string, commentData: CommentRequest): Promise<any> => {
     console.log('Attempting to add comment to post:', postId, 'data:', commentData);
-    const headers = getAuthHeaders();
-    console.log('Headers being sent:', headers);
     
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments`, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(commentData),
     });
     
@@ -133,9 +135,8 @@ export const postApi = {
 
   // Delete a comment
   deleteComment: async (postId: string, commentId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
@@ -145,9 +146,11 @@ export const postApi = {
 
   // Flag a post
   flagPost: async (postId: string, reason: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/flag`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/flag`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ reason }),
     });
     
@@ -158,9 +161,8 @@ export const postApi = {
 
   // Delete a post (admin only)
   deletePost: async (postId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
@@ -170,9 +172,7 @@ export const postApi = {
 
   // Get flagged posts (admin only)
   getFlaggedPosts: async (): Promise<PostResponse[]> => {
-    const response = await fetch(`${API_BASE_URL}/posts/flagged`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/flagged`);
     
     if (!response.ok) {
       if (response.status === 401) {
@@ -189,9 +189,11 @@ export const postApi = {
 
   // Like a comment
   toggleCommentLike: async (postId: string, commentId: string): Promise<{ liked: boolean; likesCount: number }> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/like`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/like`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     
     if (!response.ok) {
@@ -203,9 +205,11 @@ export const postApi = {
 
   // React to a post with emoji - matches backend route /:id/react
   reactToPost: async (postId: string, emoji: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/react`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/react`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ emoji }),
     });
     
@@ -216,9 +220,11 @@ export const postApi = {
 
   // Add reply to comment - matches backend route /:postId/comments/:commentId/replies
   addCommentReply: async (postId: string, commentId: string, userId: string, text: string): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ userId, text }),
     });
     
