@@ -1,151 +1,181 @@
-import { getAuthHeaders } from '@/utils/auth';
+import { authenticatedFetch } from '@/utils/auth';
 
-const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
-const REPORTS_API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
-
-interface ReportData {
-  title: string;
-  description: string;
-  type: string;
-  userId?: string;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
-  location?: string;
-  platform?: string;
-  evidence?: string;
-  isAnonymous?: boolean;
-  flagged?: boolean;
-}
-
-interface Report {
+interface PostResponse {
   _id: string;
-  title: string;
-  type: string;
-  severity: string;
-  description: string;
-  location?: string;
-  platform?: string;
-  evidence?: string;
+  type: 'physical' | 'verbal' | 'cyber' | 'general';
+  content: string;
+  tags: string[];
+  adviceRequested: boolean;
+  escalated: boolean;
   isAnonymous: boolean;
-  flagged: boolean;
-  status: 'pending' | 'reviewed' | 'resolved';
   createdBy: string;
   createdAt: string;
-  reactions: Array<{
+  likes: string[];
+  reactions?: Array<{
     emoji: string;
     userId: string;
     username: string;
   }>;
-  updates: Array<{
+  comments: Array<{
     _id: string;
-    message: string;
+    user: { _id: string; username: string };
+    text: string;
     createdAt: string;
-    createdBy: string;
+    likes?: string[];
+    replies?: Array<{
+      _id: string;
+      user: { _id: string; username: string };
+      text: string;
+      createdAt: string;
+      likes?: string[];
+    }>;
   }>;
+  flagged: boolean;
 }
 
-export const reportsApi = {
-  // ===== Public / Anonymous =====
-  createReport: async (reportData: ReportData): Promise<Report> => {
-    const payload = { ...reportData, isAnonymous: true };
+interface CommentRequest {
+  userId: string;
+  text: string;
+}
 
-    const response = await fetch(`${REPORTS_API_BASE_URL}/reports`, {
+interface CreatePostRequest {
+  title: string;
+  content: string;
+  userId?: string;
+  type?: string;
+  tags?: string[];
+  adviceRequested?: boolean;
+  isAnonymous?: boolean;
+}
+
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
+
+export const postApi = {
+  // Get all posts (public)
+  getPosts: async (): Promise<PostResponse[]> => {
+    const response = await fetch(`${API_BASE_URL}/posts`);
+    if (!response.ok) throw new Error('Failed to fetch posts');
+    return response.json();
+  },
+
+  // Create a new post
+  createPost: async (postData: CreatePostRequest): Promise<PostResponse> => {
+    // Use authenticatedFetch only if userId is provided
+    if (postData.userId) {
+      const response = await authenticatedFetch(`${API_BASE_URL}/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postData),
+      });
+      if (!response.ok) throw new Error('Failed to create post');
+      return response.json();
+    } else {
+      // anonymous post
+      const response = await fetch(`${API_BASE_URL}/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postData),
+      });
+      if (!response.ok) throw new Error('Failed to create post');
+      return response.json();
+    }
+  },
+
+  // Like/unlike a post
+  toggleLike: async (postId: string): Promise<{ liked: boolean; likesCount: number }> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({}),
     });
-
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to create report: ${errorText}`);
+      throw new Error(`Failed to toggle like: ${response.status} - ${errorText}`);
     }
-
     return response.json();
   },
 
-  // ===== Admin / Protected =====
-  getReports: async (): Promise<Report[]> => {
-    const response = await fetch(`${API_BASE_URL}/reports`, {
-      headers: getAuthHeaders(),
+  // Add a comment to a post
+  addComment: async (postId: string, commentData: CommentRequest) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(commentData),
     });
-
-    if (!response.ok) throw new Error('Failed to fetch reports');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to add comment: ${response.status} - ${errorText}`);
+    }
     return response.json();
   },
 
-  flagReport: async (reportId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reports/${reportId}/flag`, {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) throw new Error('Failed to flag report');
-  },
-
-  deleteReport: async (reportId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
+  // Delete a comment
+  deleteComment: async (postId: string, commentId: string) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
     });
-
-    if (!response.ok) throw new Error('Failed to delete report');
+    if (!response.ok) throw new Error('Failed to delete comment');
   },
 
-  reactToReport: async (reportId: string, emoji: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reports/${reportId}/react`, {
-      method: 'PATCH',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
+  // Flag a post
+  flagPost: async (postId: string, reason: string) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/flag`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    if (!response.ok) throw new Error('Failed to flag post');
+  },
+
+  // Delete a post (admin only)
+  deletePost: async (postId: string) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete post');
+  },
+
+  // Get flagged posts (admin only)
+  getFlaggedPosts: async (): Promise<PostResponse[]> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/flagged`);
+    if (!response.ok) {
+      if (response.status === 401) throw new Error('Unauthorized: Admin access required');
+      if (response.status === 404) throw new Error('Flagged posts endpoint not found');
+      throw new Error(`Failed to fetch flagged posts: ${response.status}`);
+    }
+    return response.json();
+  },
+
+  // Like a comment
+  toggleCommentLike: async (postId: string, commentId: string) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/like`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) throw new Error('Failed to like comment');
+    return response.json();
+  },
+
+  // React to a post with emoji
+  reactToPost: async (postId: string, emoji: string) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/react`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ emoji }),
     });
-
-    if (!response.ok) throw new Error('Failed to react to report');
+    if (!response.ok) throw new Error('Failed to react to post');
   },
 
-  getFlaggedReports: async (): Promise<Report[]> => {
-    const response = await fetch(`${API_BASE_URL}/reports/flagged`, {
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch flagged reports');
-    return response.json();
-  },
-
-  getReport: async (reportId: string): Promise<Report> => {
-    const response = await fetch(`${API_BASE_URL}/reports/${reportId}`, {
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch report');
-    return response.json();
-  },
-
-  updateReportProgress: async (reportId: string, message: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reports/${reportId}/progress`, {
-      method: 'PATCH',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message }),
-    });
-
-    if (!response.ok) throw new Error('Failed to update report progress');
-  },
-
-  addReportUpdate: async (reportId: string, message: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/reports/${reportId}/update`, {
+  // Add reply to comment
+  addCommentReply: async (postId: string, commentId: string, userId: string, text: string) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, text }),
     });
-
-    if (!response.ok) throw new Error('Failed to add report update');
+    if (!response.ok) throw new Error('Failed to add reply');
+    return response.json();
   },
 };
 
-export type { Report, ReportData };
+export type { PostResponse, CommentRequest, CreatePostRequest };
