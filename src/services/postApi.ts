@@ -1,4 +1,3 @@
-// api/postApi.ts
 import { authenticatedFetch } from '@/utils/auth';
 
 interface PostResponse {
@@ -15,7 +14,7 @@ interface PostResponse {
   reactions?: Array<{
     emoji: string;
     userId: string;
-    username: string;
+    username?: string;
   }>;
   comments: Array<{
     _id: string;
@@ -51,95 +50,95 @@ const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
 
 export const postApi = {
   getPosts: async (): Promise<PostResponse[]> => {
-    const response = await fetch(`${API_BASE_URL}/posts`);
-    if (!response.ok) throw new Error('Failed to fetch posts');
-    return response.json();
+    const res = await fetch(`${API_BASE_URL}/posts`);
+    if (!res.ok) throw new Error('Failed to fetch posts');
+    return res.json();
   },
 
   getPostById: async (postId: string): Promise<PostResponse> => {
-    const response = await fetch(`${API_BASE_URL}/posts/${postId}`);
-    if (!response.ok) throw new Error('Failed to fetch post');
-    return response.json();
+    const res = await fetch(`${API_BASE_URL}/posts/${postId}`);
+    if (!res.ok) throw new Error('Failed to fetch post');
+    return res.json();
   },
 
   createPost: async (postData: CreatePostRequest): Promise<PostResponse> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts`, {
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(postData),
     });
-    if (!response.ok) throw new Error('Failed to create post');
-    return response.json();
+    if (!res.ok) throw new Error('Failed to create post');
+    return res.json();
   },
 
-  toggleLike: async (postId: string): Promise<{ liked: boolean; likesCount: number }> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/like`, {
+  toggleLike: async (postId: string) => {
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
     });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Failed to toggle like: ${response.status} - ${text}`);
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to toggle like');
+    return res.json();
   },
 
   addComment: async (postId: string, commentData: CommentRequest) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments`, {
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(commentData),
     });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Failed to add comment: ${response.status} - ${text}`);
-    }
-    return response.json();
+    if (!res.ok) throw new Error('Failed to add comment');
+    return res.json();
   },
 
   addCommentReply: async (postId: string, commentId: string, replyData: CommentRequest) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(replyData),
     });
-    if (!response.ok) throw new Error('Failed to add reply');
-    return response.json();
+    if (!res.ok) throw new Error('Failed to add reply');
+    return res.json();
   },
 
   reactToPost: async (postId: string, emoji: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/react`, {
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/react`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ emoji }),
     });
-    if (!response.ok) throw new Error('Failed to react to post');
-    return response.json();
+    if (!res.ok) throw new Error('Failed to react to post');
+    const data = await res.json();
+
+    // Convert backend object { userId: emoji } to array for frontend
+    const reactionsArray = Object.entries(data.reactions || {}).map(([userId, emoji]) => ({ userId, emoji }));
+    return { ...data, reactions: reactionsArray };
   },
 
   flagPost: async (postId: string, reason: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/flag`, {
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/flag`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason }),
     });
-    if (!response.ok) throw new Error('Failed to flag post');
-    return response.json();
+    if (!res.ok) throw new Error('Failed to flag post');
+    return res.json();
   },
 
   deletePost: async (postId: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete post');
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete post');
   },
 
   deleteComment: async (postId: string, commentId: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete comment');
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete comment');
   },
 
   getFlaggedPosts: async (): Promise<PostResponse[]> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/flagged`);
-    if (!response.ok) throw new Error(`Failed to fetch flagged posts: ${response.status}`);
-    return response.json();
+    const res = await authenticatedFetch(`${API_BASE_URL}/posts/flagged`);
+    if (!res.ok) throw new Error(`Failed to fetch flagged posts: ${res.status}`);
+    return res.json();
   },
 };
 
