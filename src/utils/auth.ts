@@ -1,11 +1,7 @@
-// utils/auth.ts
-
-// Get token from localStorage
 export const getAuthToken = (): string | null => {
   return localStorage.getItem('accessToken');
 };
 
-// Create common headers
 export const getAuthHeaders = () => {
   const token = getAuthToken();
   return {
@@ -14,14 +10,13 @@ export const getAuthHeaders = () => {
   };
 };
 
-// Refresh JWT using refresh token (cookies)
 export const refreshToken = async (): Promise<string | null> => {
   try {
     const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/refresh', {
       method: 'POST',
-      credentials: 'include', // sends refresh token cookie
+      credentials: 'include',
     });
-
+    
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem('accessToken', data.accessToken);
@@ -30,68 +25,56 @@ export const refreshToken = async (): Promise<string | null> => {
   } catch (error) {
     console.error('Token refresh failed:', error);
   }
-
+  
   localStorage.removeItem('accessToken');
   return null;
 };
 
-// Authenticated fetch with automatic token refresh
-export const authenticatedFetch = async (
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> => {
-  let token = getAuthToken();
-
-  let response = await fetch(url, {
+export const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const token = getAuthToken();
+  
+  const response = await fetch(url, {
     ...options,
     headers: {
-      ...getAuthHeaders(),
       ...options.headers,
+      ...(token && { 'Authorization': `Bearer ${token}` }),
     },
     credentials: 'include',
   });
-
-  // If unauthorized, try refresh token flow
+  
+  // If we get a 401, try to refresh the token
   if (response.status === 401 && token) {
-    token = await refreshToken();
-    if (token) {
-      response = await fetch(url, {
+    const newToken = await refreshToken();
+    if (newToken) {
+      // Retry the request with the new token
+      return fetch(url, {
         ...options,
         headers: {
-          ...getAuthHeaders(),
           ...options.headers,
+          'Authorization': `Bearer ${newToken}`,
         },
         credentials: 'include',
       });
     }
   }
-
+  
   return response;
 };
 
-// Quick check if user is logged in
 export const isAuthenticated = (): boolean => {
   return !!getAuthToken();
 };
 
-// Role-based access check
-export const hasRole = (
-  user: any,
-  requiredRole: 'user' | 'moderator' | 'admin'
-): boolean => {
+export const hasRole = (user: any, requiredRole: 'user' | 'moderator' | 'admin'): boolean => {
   if (!user) return false;
-
+  
   const roleHierarchy = {
-    user: 1,
-    moderator: 2,
-    admin: 3,
+    'user': 1,
+    'moderator': 2,
+    'admin': 3,
   };
-
-  const userRole = user.isAdmin
-    ? 'admin'
-    : user.isModerator
-    ? 'moderator'
-    : 'user';
-
+  
+  const userRole = user.isAdmin ? 'admin' : (user.isModerator ? 'moderator' : 'user');
+  
   return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
 };
