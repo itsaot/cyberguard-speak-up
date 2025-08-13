@@ -115,7 +115,7 @@ const ReportIncident = () => {
 
       console.log('📡 Report POST - Headers being sent:', headers);
 
-      const response = await fetch('https://cybergaurd-backend-2.onrender.com/api/reports', {
+      const response = await fetch('https://cybergaurdapi.onrender.com/api/reports', {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody),
