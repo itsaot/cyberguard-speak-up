@@ -43,7 +43,7 @@ interface Report {
 }
 
 export const reportsApi = {
-  // Create a new report (anonymous or authenticated)
+  /** ✅ PUBLIC: Anyone can submit a report */
   createReport: async (reportData: ReportData): Promise<Report> => {
     const response = await fetch(`${API_BASE_URL}/reports`, {
       method: 'POST',
@@ -57,14 +57,28 @@ export const reportsApi = {
     return response.json();
   },
 
-  // Get all reports (admin only)
+  /** 🔒 Admin only */
   getReports: async (): Promise<Report[]> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports`);
     if (!response.ok) throw new Error('Failed to fetch reports');
     return response.json();
   },
 
-  // Flag a report (admin only)
+  /** 🔒 Admin only */
+  getFlaggedReports: async (): Promise<Report[]> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/reports/flagged`);
+    if (!response.ok) throw new Error('Failed to fetch flagged reports');
+    return response.json();
+  },
+
+  /** 🔒 Admin only */
+  getReport: async (reportId: string): Promise<Report> => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}`);
+    if (!response.ok) throw new Error('Failed to fetch report');
+    return response.json();
+  },
+
+  /** 🔒 Admin only */
   flagReport: async (reportId: string): Promise<void> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}/flag`, {
       method: 'PATCH',
@@ -73,7 +87,7 @@ export const reportsApi = {
     if (!response.ok) throw new Error('Failed to flag report');
   },
 
-  // Delete a report (admin only)
+  /** 🔒 Admin only */
   deleteReport: async (reportId: string): Promise<void> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}`, {
       method: 'DELETE',
@@ -81,7 +95,7 @@ export const reportsApi = {
     if (!response.ok) throw new Error('Failed to delete report');
   },
 
-  // React to a report with emoji
+  /** 🔒 Admin only */
   reactToReport: async (reportId: string, emoji: string): Promise<void> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}/react`, {
       method: 'PATCH',
@@ -91,21 +105,7 @@ export const reportsApi = {
     if (!response.ok) throw new Error('Failed to react to report');
   },
 
-  // Get flagged reports (admin only)
-  getFlaggedReports: async (): Promise<Report[]> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/reports/flagged`);
-    if (!response.ok) throw new Error('Failed to fetch flagged reports');
-    return response.json();
-  },
-
-  // Get single report (admin only)
-  getReport: async (reportId: string): Promise<Report> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}`);
-    if (!response.ok) throw new Error('Failed to fetch report');
-    return response.json();
-  },
-
-  // Update report progress/status (admin only)
+  /** 🔒 Admin only */
   updateReportProgress: async (reportId: string, message: string): Promise<void> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}/progress`, {
       method: 'PATCH',
@@ -115,7 +115,7 @@ export const reportsApi = {
     if (!response.ok) throw new Error('Failed to update report progress');
   },
 
-  // Add update to report (admin only)
+  /** 🔒 Admin only */
   addReportUpdate: async (reportId: string, message: string): Promise<void> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}/update`, {
       method: 'POST',
