@@ -34,7 +34,7 @@ interface PostResponse {
 }
 
 interface CommentRequest {
-  userId: string;
+  userId?: string;
   text: string;
 }
 
@@ -58,32 +58,20 @@ export const postApi = {
     return response.json();
   },
 
-  // Create a new post
+  // Create a new post (anonymous or authenticated)
   createPost: async (postData: CreatePostRequest): Promise<PostResponse> => {
-    // Use authenticatedFetch only if userId is provided
-    if (postData.userId) {
-      const response = await authenticatedFetch(`${API_BASE_URL}/posts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(postData),
-      });
-      if (!response.ok) throw new Error('Failed to create post');
-      return response.json();
-    } else {
-      // anonymous post
-      const response = await fetch(`${API_BASE_URL}/posts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(postData),
-      });
-      if (!response.ok) throw new Error('Failed to create post');
-      return response.json();
-    }
+    const response = await fetch(`${API_BASE_URL}/posts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(postData),
+    });
+    if (!response.ok) throw new Error('Failed to create post');
+    return response.json();
   },
 
-  // Like/unlike a post
+  // Like/unlike a post (anonymous possible)
   toggleLike: async (postId: string): Promise<{ liked: boolean; likesCount: number }> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/like`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
@@ -95,9 +83,9 @@ export const postApi = {
     return response.json();
   },
 
-  // Add a comment to a post
+  // Add a comment (anonymous possible)
   addComment: async (postId: string, commentData: CommentRequest) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(commentData),
@@ -109,73 +97,62 @@ export const postApi = {
     return response.json();
   },
 
-  // Delete a comment
-  deleteComment: async (postId: string, commentId: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete comment');
-  },
-
-  // Flag a post
-  flagPost: async (postId: string, reason: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/flag`, {
+  // Add reply to a comment (anonymous possible)
+  addCommentReply: async (postId: string, commentId: string, replyData: CommentRequest) => {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify(replyData),
     });
-    if (!response.ok) throw new Error('Failed to flag post');
-  },
-
-  // Delete a post (admin only)
-  deletePost: async (postId: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete post');
-  },
-
-  // Get flagged posts (admin only)
-  getFlaggedPosts: async (): Promise<PostResponse[]> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/flagged`);
-    if (!response.ok) {
-      if (response.status === 401) throw new Error('Unauthorized: Admin access required');
-      if (response.status === 404) throw new Error('Flagged posts endpoint not found');
-      throw new Error(`Failed to fetch flagged posts: ${response.status}`);
-    }
+    if (!response.ok) throw new Error('Failed to add reply');
     return response.json();
   },
 
-  // Like a comment
-  toggleCommentLike: async (postId: string, commentId: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/like`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (!response.ok) throw new Error('Failed to like comment');
-    return response.json();
-  },
-
-  // React to a post with emoji
+  // React to a post with emoji (anonymous possible)
   reactToPost: async (postId: string, emoji: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/react`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/react`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ emoji }),
     });
     if (!response.ok) throw new Error('Failed to react to post');
+    return response.json();
   },
 
-  // Add reply to comment
-  addCommentReply: async (postId: string, commentId: string, userId: string, text: string) => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
+  // Flag a post (anonymous possible)
+  flagPost: async (postId: string, reason: string) => {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/flag`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, text }),
+      body: JSON.stringify({ reason }),
     });
-    if (!response.ok) throw new Error('Failed to add reply');
+    if (!response.ok) throw new Error('Failed to flag post');
+    return response.json();
+  },
+
+  // Delete a post (admin only, still protected)
+  deletePost: async (postId: string) => {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete post');
+  },
+
+  // Delete a comment (optional, keep admin-only for safety)
+  deleteComment: async (postId: string, commentId: string) => {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete comment');
+  },
+
+  // Get flagged posts (admin only)
+  getFlaggedPosts: async (): Promise<PostResponse[]> => {
+    const response = await fetch(`${API_BASE_URL}/posts/flagged`);
+    if (!response.ok) throw new Error(`Failed to fetch flagged posts: ${response.status}`);
     return response.json();
   },
 };
 
 export type { PostResponse, CommentRequest, CreatePostRequest };
+
