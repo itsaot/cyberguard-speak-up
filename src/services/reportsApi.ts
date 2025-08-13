@@ -1,6 +1,7 @@
 import { getAuthHeaders } from '@/utils/auth';
 
 const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
+const REPORTS_API_BASE_URL = 'https://cyberguard-backend-2.onrender.com/api';
 
 interface ReportData {
   title: string;
@@ -43,16 +44,20 @@ interface Report {
 }
 
 export const reportsApi = {
-  // Create a new report
+  // Create a new report - anonymous backend
   createReport: async (reportData: ReportData): Promise<Report> => {
-    const response = await fetch(`${API_BASE_URL}/reports`, {
+    const response = await fetch(`${REPORTS_API_BASE_URL}/reports`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
       body: JSON.stringify(reportData),
     });
     
     if (!response.ok) {
-      throw new Error('Failed to create report');
+      const errorText = await response.text();
+      throw new Error(`Failed to create report: ${errorText}`);
     }
     
     return response.json();

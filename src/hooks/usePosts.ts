@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { postApi, PostResponse } from '@/services/postApi';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const usePosts = () => {
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchPosts = async () => {
     try {
@@ -29,7 +31,8 @@ export const usePosts = () => {
 
   const toggleLike = async (postId: string, userId?: string) => {
     try {
-      const result = await postApi.toggleLike(postId, userId);
+      const userIdToUse = userId || user?.id;
+      const result = await postApi.toggleLike(postId, userIdToUse);
       
       setPosts(prevPosts => 
         prevPosts.map(post => 
@@ -37,8 +40,8 @@ export const usePosts = () => {
             ? { 
                 ...post, 
                 likes: result.liked 
-                  ? [...post.likes, userId || 'anonymous-user'] // Add user to likes
-                  : post.likes.filter(id => id !== (userId || 'anonymous-user')) // Remove user from likes
+                  ? [...post.likes, userIdToUse || 'anonymous-user'] // Add user to likes
+                  : post.likes.filter(id => id !== (userIdToUse || 'anonymous-user')) // Remove user from likes
               }
             : post
         )
@@ -59,7 +62,12 @@ export const usePosts = () => {
 
   const addComment = async (postId: string, text: string, userId?: string) => {
     try {
-      const userIdToSend = userId || `anonymous-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Use the actual user ID from auth context for proper MongoDB ObjectId
+      const userIdToSend = userId || user?.id;
+      if (!userIdToSend) {
+        throw new Error('User must be logged in to comment');
+      }
+      
       const newComment = await postApi.addComment(postId, { userId: userIdToSend, text });
       
       setPosts(prevPosts => 
@@ -77,7 +85,7 @@ export const usePosts = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add comment.",
+        description: "Failed to add comment. Please make sure you're logged in.",
         variant: "destructive",
       });
     }
