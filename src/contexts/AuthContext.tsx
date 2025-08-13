@@ -63,16 +63,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    try {
-      await authApi.login({ username, password });
-      await fetchUser();
-      return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
-    }
-  };
+const login = async (username: string, password: string): Promise<boolean> => {
+  // First, check for the hardcoded admin
+  if (username === "admin" && password === "admin123") {
+    const adminUser = {
+      id: "admin-001",
+      username: "admin",
+      isAdmin: true,
+    };
+    localStorage.setItem('cyberguard_token', 'dev-admin-token');
+    setUser(adminUser);
+    return true;
+  }
+
+  // Otherwise, try the regular API login
+  try {
+    await authApi.login({ username, password });
+    await fetchUser();
+    return true;
+  } catch (error) {
+    console.error('Login error:', error);
+    return false;
+  }
+};
+
 
   const register = async (data: RegisterData): Promise<boolean> => {
     try {
