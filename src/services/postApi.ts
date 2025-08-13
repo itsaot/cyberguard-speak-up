@@ -89,21 +89,23 @@ export const postApi = {
 
   // Like/unlike a post - matches backend route /:postId/like
   toggleLike: async (postId: string, userId?: string): Promise<{ liked: boolean; likesCount: number }> => {
-    console.log('Attempting to toggle like for post:', postId);
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      throw new Error('Must be logged in to like posts');
+    }
     
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/like`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({}), // Backend might expect empty body
+      credentials: 'include',
+      body: JSON.stringify({}),
     });
-    
-    console.log('Like response status:', response.status);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Like error response:', errorText);
       throw new Error(`Failed to toggle like: ${response.status} - ${errorText}`);
     }
     
@@ -112,21 +114,23 @@ export const postApi = {
 
   // Add a comment to a post
   addComment: async (postId: string, commentData: CommentRequest): Promise<any> => {
-    console.log('Attempting to add comment to post:', postId, 'data:', commentData);
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      throw new Error('Must be logged in to comment');
+    }
     
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify(commentData),
     });
     
-    console.log('Comment response status:', response.status);
-    
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Comment error response:', errorText);
       throw new Error(`Failed to add comment: ${response.status} - ${errorText}`);
     }
     
@@ -205,11 +209,18 @@ export const postApi = {
 
   // React to a post with emoji - matches backend route /:id/react
   reactToPost: async (postId: string, emoji: string): Promise<void> => {
-    const response = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/react`, {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      throw new Error('Must be logged in to react to posts');
+    }
+    
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/react`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify({ emoji }),
     });
     
