@@ -35,6 +35,7 @@ interface PostResponse {
 
 interface CommentRequest {
   text: string;
+  userId?: string;
 }
 
 interface CreatePostRequest {

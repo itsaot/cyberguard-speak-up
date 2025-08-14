@@ -12,8 +12,8 @@ import EmojiReactions from '@/components/EmojiReactions';
 
 interface PostCardProps {
   post: PostResponse;
-  onToggleLike: (postId: string, userId?: string) => void;
-  onAddComment: (postId: string, text: string, userId?: string) => void;
+  onToggleLike: (postId: string) => void;
+  onAddComment: (postId: string, text: string) => void;
   onDeleteComment: (postId: string, commentId: string) => void;
   onFlagPost: (postId: string, reason: string) => void;
   onDeletePost: (postId: string) => void;
@@ -47,7 +47,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
     setIsSubmittingComment(true);
     try {
-      await onAddComment(post._id, newComment.trim(), user?.id);
+      await onAddComment(post._id, newComment.trim());
       setNewComment('');
     } finally {
       setIsSubmittingComment(false);
@@ -61,25 +61,32 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const handleCommentLike = async (commentId: string) => {
+    if (!user) {
+      alert('Please sign in to like comments');
+      return;
+    }
+    
     try {
-      const result = await postApi.toggleCommentLike(post._id, commentId);
-      // Since backend endpoints aren't ready, we'll show success feedback for now
-      console.log('Comment like toggled:', result);
+      // Comment liking endpoint not implemented yet
+      console.log('Comment like toggled for comment:', commentId);
     } catch (error) {
       console.error('Failed to like comment:', error);
     }
   };
 
   const handleReply = async (commentId: string) => {
+    if (!user) {
+      alert('Please sign in to reply to comments');
+      return;
+    }
+    
     if (!replyText.trim()) return;
 
     setIsSubmittingReply(true);
     try {
-      const userIdToSend = user?.id || `anonymous-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      await postApi.addCommentReply(post._id, commentId, userIdToSend, replyText.trim());
+      await postApi.addCommentReply(post._id, commentId, { text: replyText.trim() });
       setReplyText('');
       setReplyingTo(null);
-      // Since backend endpoints aren't ready, we'll show success feedback for now
       console.log('Reply added successfully');
     } catch (error) {
       console.error('Failed to add reply:', error);
@@ -98,6 +105,11 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const handleEmojiReact = async (emoji: string) => {
+    if (!user) {
+      alert('Please sign in to react to posts');
+      return;
+    }
+    
     try {
       await postApi.reactToPost(post._id, emoji);
       // Optionally call onReact if provided to update parent state
@@ -148,7 +160,10 @@ const PostCard: React.FC<PostCardProps> = ({
         {user && (
           <div className="mb-4">
             <EmojiReactions
-              reactions={Array.isArray(post.reactions) ? post.reactions : []}
+              reactions={Array.isArray(post.reactions) ? post.reactions.map(r => ({
+                ...r,
+                username: r.username || 'Anonymous'
+              })) : []}
               onReact={handleEmojiReact}
               disabled={false}
             />
@@ -175,7 +190,13 @@ const PostCard: React.FC<PostCardProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onToggleLike(post._id, user?.id)}
+              onClick={() => {
+                if (!user) {
+                  alert('Please sign in to like posts');
+                  return;
+                }
+                onToggleLike(post._id);
+              }}
               className={`flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}`}
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
@@ -266,23 +287,31 @@ const PostCard: React.FC<PostCardProps> = ({
         {showComments && (
           <div className="mt-4 border-t pt-4">
             {/* Add Comment Form */}
-            <form onSubmit={handleAddComment} className="mb-4">
-              <div className="flex space-x-2">
-                <Textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="flex-1 min-h-[80px]"
-                />
-                <Button
-                  type="submit"
-                  disabled={!newComment.trim() || isSubmittingComment}
-                  size="sm"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+            {user ? (
+              <form onSubmit={handleAddComment} className="mb-4">
+                <div className="flex space-x-2">
+                  <Textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Add a comment..."
+                    className="flex-1 min-h-[80px]"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!newComment.trim() || isSubmittingComment}
+                    size="sm"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <div className="mb-4 p-4 bg-muted/50 rounded-lg text-center">
+                <p className="text-muted-foreground text-sm">
+                  Please <a href="/login" className="text-primary hover:underline">sign in</a> to add comments
+                </p>
               </div>
-            </form>
+            )}
 
             {/* Comments List */}
             <div className="space-y-3">

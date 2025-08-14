@@ -29,10 +29,18 @@ export const usePosts = () => {
     fetchPosts();
   }, []);
 
-  const toggleLike = async (postId: string, userId?: string) => {
+  const toggleLike = async (postId: string) => {
+    if (!user) {
+      toast({ 
+        title: "Sign in required", 
+        description: "Please sign in to like posts", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     try {
-      const userIdToUse = userId || user?.id;
-      const result = await postApi.toggleLike(postId, userIdToUse);
+      const result = await postApi.toggleLike(postId);
       
       setPosts(prevPosts => 
         prevPosts.map(post => 
@@ -40,8 +48,8 @@ export const usePosts = () => {
             ? { 
                 ...post, 
                 likes: result.liked 
-                  ? [...post.likes, userIdToUse || 'anonymous-user'] // Add user to likes
-                  : post.likes.filter(id => id !== (userIdToUse || 'anonymous-user')) // Remove user from likes
+                  ? [...post.likes, user.id] // Add user to likes
+                  : post.likes.filter(id => id !== user.id) // Remove user from likes
               }
             : post
         )
@@ -60,15 +68,18 @@ export const usePosts = () => {
     }
   };
 
-  const addComment = async (postId: string, text: string, userId?: string) => {
+  const addComment = async (postId: string, text: string) => {
+    if (!user) {
+      toast({ 
+        title: "Sign in required", 
+        description: "Please sign in to comment on posts", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     try {
-      // Use the actual user ID from auth context for proper MongoDB ObjectId
-      const userIdToSend = userId || user?.id;
-      if (!userIdToSend) {
-        throw new Error('User must be logged in to comment');
-      }
-      
-      const newComment = await postApi.addComment(postId, { userId: userIdToSend, text });
+      const newComment = await postApi.addComment(postId, { text });
       
       setPosts(prevPosts => 
         prevPosts.map(post => 
@@ -156,6 +167,15 @@ export const usePosts = () => {
   };
 
   const reactToPost = async (postId: string, emoji: string) => {
+    if (!user) {
+      toast({ 
+        title: "Sign in required", 
+        description: "Please sign in to react to posts", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     try {
       await postApi.reactToPost(postId, emoji);
       
