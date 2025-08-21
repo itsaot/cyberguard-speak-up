@@ -125,7 +125,7 @@ const Login = () => {
             </Link>
             <br />
             <span className="text-xs">
-              Admin access: admin@1, admin@2, admin@3 (password: admin123)
+              Development Mode
             </span>
           </p>
         </div>
