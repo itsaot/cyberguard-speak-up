@@ -93,6 +93,7 @@ export const postApi = {
   },
 
   addCommentReply: async (postId: string, commentId: string, replyData: CommentRequest) => {
+     console.log("Reply body being sent:", { ...replyData, text: "this is the reply" });
     const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}/replies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
