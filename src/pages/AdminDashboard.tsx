@@ -12,17 +12,8 @@ import stopBullyingBanner from "@/assets/stop-bullying-banner.jpg";
 import supportHands from "@/assets/support-hands.jpg";
 import FlaggedPostsManager from '@/components/FlaggedPostsManager';
 import { postApi, PostResponse } from '@/services/postApi';
+import { reportsApi, Report } from '@/services/reportsApi';
 
-interface Report {
-  _id: string;
-  type: string;
-  severity: string;
-  location: string;
-  description: string;
-  reportedAt: string;
-  status: string;
-  flagged: boolean;
-}
 
 
 const AdminDashboard = () => {
@@ -49,34 +40,24 @@ const AdminDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('cyberguard_token');
+      // Fetch reports and posts using the proper API services
+      const [reportsData, postsData] = await Promise.all([
+        reportsApi.getReports(),
+        postApi.getPosts()
+      ]);
       
-      // Fetch reports
-      const reportsResponse = await fetch('https://cybergaurdapi.onrender.com/api/reports', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
-      // Fetch forum posts
-      const postsData = await postApi.getPosts();
-      
-      if (reportsResponse.ok) {
-        const reportsData = await reportsResponse.json();
-        setReports(reportsData);
-        
-        // Calculate stats
-        const flaggedPostsCount = postsData.filter(post => post.flagged).length;
-        
-        setStats({
-          totalReports: reportsData.length,
-          flaggedReports: reportsData.filter((r: Report) => r.flagged).length,
-          totalPosts: postsData.length,
-          flaggedPosts: flaggedPostsCount,
-        });
-      }
-      
+      setReports(reportsData);
       setPosts(postsData);
+      
+      // Calculate stats
+      const flaggedPostsCount = postsData.filter(post => post.flagged).length;
+      
+      setStats({
+        totalReports: reportsData.length,
+        flaggedReports: reportsData.filter((r: Report) => r.flagged).length,
+        totalPosts: postsData.length,
+        flaggedPosts: flaggedPostsCount,
+      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast({
@@ -91,22 +72,12 @@ const AdminDashboard = () => {
 
   const handleFlagReport = async (reportId: string) => {
     try {
-      const token = localStorage.getItem('cyberguard_token');
-      const response = await fetch(`https://cybergaurdapi.onrender.com/api/reports/${reportId}/flag`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      await reportsApi.flagReport(reportId);
+      fetchDashboardData(); // Refresh data
+      toast({
+        title: "Report Flagged",
+        description: "The report has been flagged for review.",
       });
-
-      if (response.ok) {
-        fetchDashboardData(); // Refresh data
-        toast({
-          title: "Report Flagged",
-          description: "The report has been flagged for review.",
-        });
-      }
     } catch (error) {
       console.error('Error flagging report:', error);
       toast({
@@ -257,7 +228,7 @@ const AdminDashboard = () => {
                         <div>
                           <CardTitle className="text-lg capitalize">{report.type} Bullying</CardTitle>
                           <p className="text-sm text-muted-foreground">
-                            Reported {report.reportedAt ? format(new Date(report.reportedAt), 'MMM d, yyyy at h:mm a') : 'Unknown date'}
+                            Reported {report.createdAt ? format(new Date(report.createdAt), 'MMM d, yyyy at h:mm a') : 'Unknown date'}
                           </p>
                         </div>
                       </div>
