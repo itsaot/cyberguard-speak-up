@@ -1,6 +1,6 @@
 
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('accessToken');
+  return localStorage.getItem('accessToken') || localStorage.getItem('cyberguard_token');
 };
 
 // Create common headers
