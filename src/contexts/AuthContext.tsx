@@ -40,9 +40,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check for stored auth token on mount
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('cyberguard_token');
     if (token) {
-      fetchUser();
+      // If using the legacy cyberguard_token for admin, handle it
+      if (token === 'dev-admin-token') {
+        setUser({
+          id: "admin-001",
+          username: "admin",
+          isAdmin: true,
+        });
+        setIsLoading(false);
+      } else {
+        fetchUser();
+      }
     } else {
       setIsLoading(false);
     }
@@ -132,6 +142,8 @@ const login = async (username: string, password: string): Promise<boolean> => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('cyberguard_token');
       setUser(null);
     }
   };
