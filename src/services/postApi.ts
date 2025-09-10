@@ -127,8 +127,9 @@ export const postApi = {
     return res.json();
   },
 
-  deletePost: async (postId: string) => {
-    const res = await authenticatedFetch(`${API_BASE_URL}/posts/${postId}`, { method: 'DELETE' });
+  deletePost: async (postId: string, isAdmin: boolean = false) => {
+    const endpoint = isAdmin ? `${API_BASE_URL}/posts/${postId}` : `${API_BASE_URL}/posts/${postId}/full`;
+    const res = await authenticatedFetch(endpoint, { method: 'DELETE' });
     if (!res.ok) throw new Error('Failed to delete post');
   },
 
