@@ -1,6 +1,9 @@
 import { getAuthHeaders, authenticatedFetch } from '@/utils/auth';
 
 const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
+/** Check if current user is admin */
+const isAdminUser = (user: User | null) => user?.role === 'admin';
+
 
 interface ReportData {
   title?: string;
