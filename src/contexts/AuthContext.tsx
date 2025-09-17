@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authApi } from '@/services/authApi';
-import { useAuth } from '@/context/AuthContext';
 import { postsApi } from '@/services/postsApi';
 import type { PostResponse } from '@/types';
 
