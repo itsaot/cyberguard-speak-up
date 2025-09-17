@@ -18,24 +18,18 @@ export const refreshToken = async (): Promise<string | null> => {
     const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/refresh', {
       method: 'POST',
       credentials: 'include', // sends refresh token cookie
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem('accessToken', data.accessToken);
       return data.accessToken;
-    } else {
-      console.error('Refresh token failed with status:', response.status);
     }
   } catch (error) {
     console.error('Token refresh failed:', error);
   }
 
   localStorage.removeItem('accessToken');
-  localStorage.removeItem('cyberguard_token');
   return null;
 };
 
