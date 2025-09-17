@@ -1,9 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authApi } from '@/services/authApi';
-import { postsApi } from '@/services/postsApi';
-import type { PostResponse } from '@/types';
-
 
 interface User {
   id: string;
@@ -157,50 +154,3 @@ const login = async (username: string, password: string): Promise<boolean> => {
     </AuthContext.Provider>
   );
 };
-
-const FlaggedPosts: React.FC = () => {
-  const { user, isLoading } = useAuth();
-  const [flaggedPosts, setFlaggedPosts] = useState<PostResponse[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchFlaggedPosts = async () => {
-      if (!user?.isAdmin) {
-        setError('Admin access required');
-        return;
-      }
-
-      try {
-        const posts = await postsApi.getFlaggedPosts(user);
-        setFlaggedPosts(posts);
-      } catch (err: any) {
-        setError(err.message);
-      }
-    };
-
-    if (!isLoading) {
-      fetchFlaggedPosts();
-    }
-  }, [user, isLoading]);
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
-  return (
-    <div>
-      <h2>Flagged Posts</h2>
-      {flaggedPosts.length === 0 ? (
-        <p>No flagged posts.</p>
-      ) : (
-        flaggedPosts.map(post => (
-          <div key={post.id}>
-            <h3>{post.title}</h3>
-            <p>{post.content}</p>
-          </div>
-        ))
-      )}
-    </div>
-  );
-};
-
-export default FlaggedPosts;
