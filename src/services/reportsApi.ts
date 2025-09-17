@@ -68,12 +68,12 @@ export const reportsApi = {
   },
 
   /** 🔒 Admin only */
-  getFlaggedReports: async (): Promise<Report[]> => {
+  getFlaggedReports: async (currentUser: User | null): Promise<Report[]> => {
+    if (!isAdminUser(currentUser)) throw new Error('Admin access required');
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/flagged`);
     if (!response.ok) throw new Error('Failed to fetch flagged reports');
     return response.json();
   },
-
   /** 🔒 Admin only */
   getReport: async (reportId: string): Promise<Report> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}`);
