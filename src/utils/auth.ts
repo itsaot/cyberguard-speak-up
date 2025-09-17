@@ -1,71 +1,86 @@
+const API_BASE_URL = "https://cybergaurdapi.onrender.com/api";
 
+// ----------------------
+// 🔑 Token Helpers
+// ----------------------
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('accessToken') || localStorage.getItem('cyberguard_token');
+  return localStorage.getItem("accessToken");
 };
 
-// Create common headers
-export const getAuthHeaders = () => {
-  const token = getAuthToken();
+export const setAuthToken = (token: string) => {
+  localStorage.setItem("accessToken", token);
+};
+
+export const clearAuthTokens = () => {
+  localStorage.removeItem("accessToken");
+};
+
+// ----------------------
+// 🔑 Common Headers
+// ----------------------
+export const getAuthHeaders = (token?: string) => {
+  const activeToken = token || getAuthToken();
   return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` }),
+    "Content-Type": "application/json",
+    ...(activeToken && { Authorization: `Bearer ${activeToken}` }),
   };
 };
 
-// Refresh JWT using refresh token (cookies)
+// ----------------------
+// 🔑 Refresh Token Flow
+// ----------------------
 export const refreshToken = async (): Promise<string | null> => {
   try {
-    const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/refresh', {
-      method: 'POST',
-      credentials: 'include', // sends refresh token cookie
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: "POST",
+      credentials: "include", // send cookie
     });
 
     if (response.ok) {
       const data = await response.json();
-      localStorage.setItem('accessToken', data.accessToken);
+      setAuthToken(data.accessToken);
       return data.accessToken;
     } else {
-      console.error('Refresh token failed with status:', response.status);
+      console.error("Refresh token failed with status:", response.status);
     }
   } catch (error) {
-    console.error('Token refresh failed:', error);
+    console.error("Token refresh failed:", error);
   }
 
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('cyberguard_token');
+  clearAuthTokens();
   return null;
 };
 
-// Authenticated fetch with automatic token refresh
+// ----------------------
+// 🔑 Authenticated Fetch
+// ----------------------
 export const authenticatedFetch = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
   let token = getAuthToken();
 
+  // First attempt
   let response = await fetch(url, {
     ...options,
     headers: {
-      ...getAuthHeaders(),
-      ...options.headers,
+      ...getAuthHeaders(token),
+      ...(options.headers || {}),
     },
-    credentials: 'include',
+    credentials: "include",
   });
 
-  // If unauthorized, try refresh token flow
-  if (response.status === 401 && token) {
-    token = await refreshToken();
-    if (token) {
+  // If unauthorized, try refresh
+  if (response.status === 401) {
+    const newToken = await refreshToken();
+    if (newToken) {
       response = await fetch(url, {
         ...options,
         headers: {
-          ...getAuthHeaders(),
-          ...options.headers,
+          ...getAuthHeaders(newToken),
+          ...(options.headers || {}),
         },
-        credentials: 'include',
+        credentials: "include",
       });
     }
   }
@@ -73,15 +88,16 @@ export const authenticatedFetch = async (
   return response;
 };
 
-// Quick check if user is logged in
+// ----------------------
+// 🔑 Auth Helpers
+// ----------------------
 export const isAuthenticated = (): boolean => {
   return !!getAuthToken();
 };
 
-// Role-based access check
 export const hasRole = (
   user: any,
-  requiredRole: 'user' | 'moderator' | 'admin'
+  requiredRole: "user" | "moderator" | "admin"
 ): boolean => {
   if (!user) return false;
 
@@ -92,10 +108,10 @@ export const hasRole = (
   };
 
   const userRole = user.isAdmin
-    ? 'admin'
+    ? "admin"
     : user.isModerator
-    ? 'moderator'
-    : 'user';
+    ? "moderator"
+    : "user";
 
   return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
 };
