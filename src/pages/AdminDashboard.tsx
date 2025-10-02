@@ -60,12 +60,9 @@ const AdminDashboard = () => {
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data.';
       toast({
-        title: "Authentication Error",
-        description: errorMessage.includes('401') || errorMessage.includes('token')
-          ? "Your session has expired. Please log in again."
-          : errorMessage,
+        title: "Error",
+        description: "Failed to load dashboard data.",
         variant: "destructive",
       });
     } finally {
@@ -83,12 +80,9 @@ const AdminDashboard = () => {
       });
     } catch (error) {
       console.error('Error flagging report:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to flag the report.';
       toast({
-        title: "Authentication Error",
-        description: errorMessage.includes('401') || errorMessage.includes('token') 
-          ? "Your session has expired. Please log in again." 
-          : errorMessage,
+        title: "Error",
+        description: "Failed to flag the report.",
         variant: "destructive",
       });
     }

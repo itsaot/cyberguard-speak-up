@@ -40,9 +40,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check for stored auth token on mount
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('cyberguard_token');
     if (token) {
-      fetchUser();
+      // If using the legacy cyberguard_token for admin, handle it
+      if (token === 'dev-admin-token') {
+        setUser({
+          id: "admin-001",
+          username: "admin",
+          isAdmin: true,
+        });
+        setIsLoading(false);
+      } else {
+        fetchUser();
+      }
     } else {
       setIsLoading(false);
     }
@@ -64,16 +74,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
 const login = async (username: string, password: string): Promise<boolean> => {
-  // Handle hardcoded admin first
-  if (username === 'cyberadmin' && password === 'admin123') {
-    const adminUser = { id: 'admin-001', username, isAdmin: true };
+  // First, check for the hardcoded admin
+  if (username === "admin" && password === "admin123") {
+    const adminUser = {
+      id: "admin-001",
+      username: "admin",
+      isAdmin: true,
+    };
+    localStorage.setItem('cyberguard_token', 'dev-admin-token');
     setUser(adminUser);
-    localStorage.setItem('accessToken', 'dummy-admin-token'); // optional dummy token
     return true;
   }
 
+  // Otherwise, try the regular API login
   try {
-    // Backend login for regular users
     await authApi.login({ username, password });
     await fetchUser();
     return true;
@@ -82,7 +96,6 @@ const login = async (username: string, password: string): Promise<boolean> => {
     return false;
   }
 };
-
 
 
   const register = async (data: RegisterData): Promise<boolean> => {
@@ -130,6 +143,7 @@ const login = async (username: string, password: string): Promise<boolean> => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('cyberguard_token');
       setUser(null);
     }
   };
