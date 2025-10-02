@@ -40,19 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check for stored auth token on mount
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('cyberguard_token');
+    const token = localStorage.getItem('accessToken');
     if (token) {
-      // If using the legacy cyberguard_token for admin, handle it
-      if (token === 'dev-admin-token') {
-        setUser({
-          id: "admin-001",
-          username: "admin",
-          isAdmin: true,
-        });
-        setIsLoading(false);
-      } else {
-        fetchUser();
-      }
+      fetchUser();
     } else {
       setIsLoading(false);
     }
@@ -74,19 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
 const login = async (username: string, password: string): Promise<boolean> => {
-  // First, check for the hardcoded admin
-  if (username === "admin" && password === "admin123") {
-    const adminUser = {
-      id: "admin-001",
-      username: "admin",
-      isAdmin: true,
-    };
-    localStorage.setItem('cyberguard_token', 'dev-admin-token');
-    setUser(adminUser);
-    return true;
-  }
-
-  // Otherwise, try the regular API login
   try {
     await authApi.login({ username, password });
     await fetchUser();
@@ -143,7 +120,6 @@ const login = async (username: string, password: string): Promise<boolean> => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('cyberguard_token');
       setUser(null);
     }
   };

@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, Flag, MessageSquare, Trash2, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { postApi, PostResponse } from '@/services/postApi';
-import { getAuthHeaders } from '@/utils/auth';
+import { authenticatedFetch } from '@/utils/auth';
 
 const FlaggedPostsManager = () => {
   const [flaggedPosts, setFlaggedPosts] = useState<PostResponse[]>([]);
@@ -24,9 +24,12 @@ const FlaggedPostsManager = () => {
       setFlaggedPosts(posts);
     } catch (error: any) {
       console.error('Error fetching flagged posts:', error);
+      const errorMessage = error.message || "Failed to load flagged posts.";
       toast({
-        title: "Error",
-        description: error.message || "Failed to load flagged posts. Please ensure you're logged in as admin.",
+        title: "Authentication Error",
+        description: errorMessage.includes('401') || errorMessage.includes('token')
+          ? "Your session has expired. Please log in again as admin."
+          : errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -53,10 +56,8 @@ const FlaggedPostsManager = () => {
 
   const handleUnflagPost = async (postId: string) => {
     try {
-      // Assuming there's an unflag endpoint - if not, we'll handle this differently
-      const response = await fetch(`https://cybergaurdapi.onrender.com/api/posts/${postId}/unflag`, {
+      const response = await authenticatedFetch(`https://cybergaurdapi.onrender.com/api/posts/${postId}/unflag`, {
         method: 'PATCH',
-        headers: getAuthHeaders(),
       });
       
       if (response.ok) {
@@ -69,9 +70,12 @@ const FlaggedPostsManager = () => {
         throw new Error('Failed to unflag post');
       }
     } catch (error: any) {
+      const errorMessage = error.message || "Failed to unflag post.";
       toast({
-        title: "Error",
-        description: error.message || "Failed to unflag post.",
+        title: "Authentication Error",
+        description: errorMessage.includes('401') || errorMessage.includes('token')
+          ? "Your session has expired. Please log in again."
+          : errorMessage,
         variant: "destructive",
       });
     }
