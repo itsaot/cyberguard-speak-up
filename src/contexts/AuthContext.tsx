@@ -64,9 +64,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
 const login = async (username: string, password: string): Promise<boolean> => {
+  // Handle hardcoded admin first
+  if (username === 'cyberadmin' && password === 'admin123') {
+    const adminUser = { id: 'admin-001', username, isAdmin: true };
+    setUser(adminUser);
+    localStorage.setItem('accessToken', 'dummy-admin-token'); // optional dummy token
+    return true;
+  }
+
   try {
-    // Always call the backend API to get a real JWT token
-    // Admin credentials: cyberadmin / admin123
+    // Backend login for regular users
     await authApi.login({ username, password });
     await fetchUser();
     return true;
@@ -75,6 +82,7 @@ const login = async (username: string, password: string): Promise<boolean> => {
     return false;
   }
 };
+
 
 
   const register = async (data: RegisterData): Promise<boolean> => {
