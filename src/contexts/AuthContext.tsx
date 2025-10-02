@@ -58,16 +58,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const fetchUser = async () => {
+ const fetchUser = async () => {
   try {
     const userData = await authApi.fetchCurrentUser();
+    console.log("Fetched user:", userData); // <-- check role here
     setUser({
       ...userData,
-      isAdmin: userData.role === 'admin', // ✅ map role to isAdmin
+      isAdmin: userData.role === "admin",
     });
   } catch (error) {
-    console.error('Error fetching user:', error);
-    localStorage.removeItem('accessToken');
+    console.error("Error fetching user:", error);
+    localStorage.removeItem("accessToken");
     setUser(null);
   } finally {
     setIsLoading(false);
