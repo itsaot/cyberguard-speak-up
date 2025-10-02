@@ -56,6 +56,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       setIsLoading(false);
     }
+    const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  let token = localStorage.getItem('accessToken');
+  if (!token) throw new Error('No access token');
+
+  // Add Authorization header
+  options.headers = {
+    ...options.headers,
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+  options.credentials = 'include';
+
+  let response = await fetch(url, options);
+
+  if (response.status === 401) {
+    // Access token expired → try refresh
+    try {
+      const refreshRes = await fetch('https://cybergaurdapi.onrender.com/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!refreshRes.ok) throw new Error('Failed to refresh token');
+
+      const data = await refreshRes.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      token = data.accessToken;
+
+      // Retry original request
+      options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+      };
+      response = await fetch(url, options);
+    } catch (err) {
+      console.error('Token refresh failed:', err);
+      logout();
+      throw err;
+    }
+  }
+
+  return response;
+};
+
   }, []);
 
  const fetchUser = async () => {
@@ -112,32 +155,24 @@ const login = async (username: string, password: string): Promise<boolean> => {
     }
   };
 
-  const updateProfile = async (data: Partial<User>): Promise<boolean> => {
-    try {
-      const token = authApi.getAccessToken();
-      if (!token) return false;
+const updateProfile = async (data: Partial<User>): Promise<boolean> => {
+  try {
+    const response = await fetchWithAuth('https://cybergaurdapi.onrender.com/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
 
-      const response = await fetch('https://cybergaurdapi.onrender.com/api/auth/profile', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
+    if (!response.ok) return false;
 
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(updatedUser);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Profile update error:', error);
-      return false;
-    }
-  };
+    const updatedUser = await response.json();
+    setUser(updatedUser);
+    return true;
+  } catch (error) {
+    console.error('Profile update error:', error);
+    return false;
+  }
+};
+
 
   const logout = async () => {
     try {
