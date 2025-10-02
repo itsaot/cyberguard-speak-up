@@ -1,9 +1,6 @@
-import { getAuthHeaders, authenticatedFetch } from '@/utils/auth';
+import { authenticatedFetch } from '@/utils/auth';
 
 const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
-/** Check if current user is admin */
-const isAdminUser = (user: User | null) => user?.role === 'admin';
-
 
 interface ReportData {
   title?: string;
@@ -68,8 +65,7 @@ export const reportsApi = {
   },
 
   /** 🔒 Admin only */
-  getFlaggedReports: async (currentUser: User | null): Promise<Report[]> => {
-    if (!isAdminUser(currentUser)) throw new Error('Admin access required');
+  getFlaggedReports: async (): Promise<Report[]> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/flagged`);
     if (!response.ok) throw new Error('Failed to fetch flagged reports');
     return response.json();

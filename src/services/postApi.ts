@@ -1,5 +1,4 @@
 import { authenticatedFetch } from '@/utils/auth';
-const isAdminUser = (user: User | null) => user?.role === 'admin';
 
 interface PostResponse {
   _id: string;
@@ -139,9 +138,8 @@ export const postApi = {
     if (!res.ok) throw new Error('Failed to delete comment');
   },
 
-  getFlaggedPosts: async (currentUser: User | null): Promise<PostResponse[]> => {
-    if (!isAdminUser(currentUser)) throw new Error('Admin access required');
-
+  /** 🔒 Admin only */
+  getFlaggedPosts: async (): Promise<PostResponse[]> => {
     const res = await authenticatedFetch(`${API_BASE_URL}/posts/flagged`);
     if (!res.ok) throw new Error(`Failed to fetch flagged posts: ${res.status}`);
     return res.json();
