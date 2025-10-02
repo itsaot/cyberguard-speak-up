@@ -1,4 +1,4 @@
-import { authenticatedFetch } from '@/utils/auth';
+import { getAuthHeaders, authenticatedFetch } from '@/utils/auth';
 
 const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
 
@@ -70,6 +70,7 @@ export const reportsApi = {
     if (!response.ok) throw new Error('Failed to fetch flagged reports');
     return response.json();
   },
+
   /** 🔒 Admin only */
   getReport: async (reportId: string): Promise<Report> => {
     const response = await authenticatedFetch(`${API_BASE_URL}/reports/${reportId}`);

@@ -138,7 +138,6 @@ export const postApi = {
     if (!res.ok) throw new Error('Failed to delete comment');
   },
 
-  /** 🔒 Admin only */
   getFlaggedPosts: async (): Promise<PostResponse[]> => {
     const res = await authenticatedFetch(`${API_BASE_URL}/posts/flagged`);
     if (!res.ok) throw new Error(`Failed to fetch flagged posts: ${res.status}`);
