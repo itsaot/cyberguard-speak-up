@@ -66,17 +66,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 const login = async (username: string, password: string): Promise<boolean> => {
   try {
     // Always call the backend API to get a real JWT token
-    // This works for both admin/admin123 and regular users
-    // Make sure the admin user exists in your backend database!
+    // Admin credentials: cyberadmin / admin123
     await authApi.login({ username, password });
     await fetchUser();
     return true;
   } catch (error) {
     console.error('Login error:', error);
-    // If admin/admin123 fails, it means the admin user doesn't exist in the database
-    if (username === 'admin' && password === 'admin123') {
-      console.error('Admin user not found in database. Please create an admin user in your backend.');
-    }
     return false;
   }
 };
