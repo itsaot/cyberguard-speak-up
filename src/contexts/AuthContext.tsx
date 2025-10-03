@@ -154,22 +154,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Update profile
   // ---------------------------
   const updateProfile = async (data: Partial<User>): Promise<boolean> => {
-    try {
-      const response = await fetchWithAuth('https://cybergaurdapi.onrender.com/api/auth/user', {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+  try {
+    const response = await fetchWithAuth('https://cybergaurdapi.onrender.com/api/auth/user', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) return false;
+    if (!response.ok) return false;
 
-      const updatedUser = await response.json();
-      setUser(updatedUser);
-      return true;
-    } catch (error) {
-      console.error('Profile update error:', error);
-      return false;
-    }
-  };
+    const updatedUser = await response.json();
+    setUser(updatedUser);
+    return true;
+  } catch (error) {
+    console.error('Profile update error:', error);
+    return false;
+  }
+};
+
 
   // ---------------------------
   // Logout
