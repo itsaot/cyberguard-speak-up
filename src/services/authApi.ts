@@ -149,6 +149,6 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   return response.json();
 };
 
+export type { RegisterData, LoginData, AuthResponse };
 export { fetchWithAuth };
 
-export type { RegisterData, LoginData, AuthResponse };
