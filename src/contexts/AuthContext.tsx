@@ -155,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ---------------------------
   const updateProfile = async (data: Partial<User>): Promise<boolean> => {
     try {
-      const response = await fetchWithAuth('https://cybergaurdapi.onrender.com/api/auth/profile', {
+      const response = await fetchWithAuth('https://cybergaurdapi.onrender.com/api/auth/user', {
         method: 'PATCH',
         body: JSON.stringify(data),
       });
