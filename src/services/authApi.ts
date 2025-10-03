@@ -108,4 +108,45 @@ export const authApi = {
   getAccessToken,
 };
 
-export type { RegisterData, LoginData, AuthResponse };
+// Generic fetch wrapper that automatically adds Authorization header
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  let token = getAccessToken();
+  if (!token) throw new Error("No access token");
+
+  let response = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
+    credentials: "include",
+  });
+
+ 
+  if (response.status === 401) {
+    try {
+      token = await authApi.refreshAccessToken();
+      response = await fetch(`${API_BASE_URL}${url}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...(options.headers || {}),
+        },
+        credentials: "include",
+      });
+    } catch {
+      throw new Error("Authentication failed");
+    }
+  }
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || errorData.msg || "Request failed");
+  }
+
+  return response.json();
+};
+
+export type { RegisterData, LoginData, AuthResponse , fetchWithAuth };
