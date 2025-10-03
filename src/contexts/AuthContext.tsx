@@ -76,7 +76,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return response;
   };
- const updateProfile = async (data: Partial<User>): Promise<boolean> => { ... }
   // ---------------------------
   // Fetch current user
   // ---------------------------
