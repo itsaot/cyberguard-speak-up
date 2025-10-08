@@ -38,7 +38,6 @@ const PostCard: React.FC<PostCardProps> = ({
   const [replyText, setReplyText] = useState('');
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
-  const [likedReplies, setLikedReplies] = useState<Set<string>>(new Set());
 
   const isLiked = user ? post.likes?.includes(user.id) || false : false;
   const isAdmin = user?.isAdmin || false;
@@ -107,15 +106,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const handleReplyLike = async (commentId: string, replyId: string) => {
     try {
-      setLikedReplies(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(replyId)) {
-          newSet.delete(replyId);
-        } else {
-          newSet.add(replyId);
-        }
-        return newSet;
-      });
+      // This would need a backend endpoint for reply likes
       console.log('Reply like toggled for reply:', replyId);
     } catch (error) {
       console.error('Failed to like reply:', error);
@@ -432,9 +423,9 @@ const PostCard: React.FC<PostCardProps> = ({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleReplyLike(comment._id, reply._id)}
-                              className={`h-5 p-1 ${likedReplies.has(reply._id) ? 'text-blue-500' : 'text-muted-foreground hover:text-blue-500'}`}
+                              className="h-5 p-1 text-muted-foreground hover:text-red-500"
                             >
-                              <Heart className={`h-2 w-2 mr-1 ${likedReplies.has(reply._id) ? 'fill-current' : ''}`} />
+                              <Heart className="h-2 w-2 mr-1" />
                               <span className="text-xs">{reply.likes?.length || 0}</span>
                             </Button>
                           </div>
