@@ -226,21 +226,32 @@ const ReportIncident = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Incident Type */}
             <div className="space-y-2">
-              <Label htmlFor="incidentType">Type of Incident *</Label>
-              <Select value={formData.incidentType} onValueChange={(value) => handleInputChange('incidentType', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select incident type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="physical">Physical Bullying</SelectItem>
-                  <SelectItem value="verbal">Verbal Bullying</SelectItem>
-                  <SelectItem value="social">Social/Relational Bullying</SelectItem>
-                  <SelectItem value="cyber">Cyberbullying</SelectItem>
-                  <SelectItem value="discrimination">Discrimination</SelectItem>
-                  <SelectItem value="harassment">Harassment</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Type of Incident *</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'physical', label: 'Physical Bullying', icon: '👊' },
+                  { value: 'verbal', label: 'Verbal Bullying', icon: '💬' },
+                  { value: 'social', label: 'Social/Relational', icon: '👥' },
+                  { value: 'cyber', label: 'Cyberbullying', icon: '💻' },
+                  { value: 'discrimination', label: 'Discrimination', icon: '⚖️' },
+                  { value: 'harassment', label: 'Harassment', icon: '⚠️' },
+                  { value: 'other', label: 'Other', icon: '📝' },
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => handleInputChange('incidentType', type.value)}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      formData.incidentType === type.value
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">{type.icon}</div>
+                    <div className="text-sm font-medium">{type.label}</div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Severity */}
