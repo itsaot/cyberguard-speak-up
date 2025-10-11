@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, Shield, Lock } from 'lucide-react';
+import { AlertTriangle, Shield, Lock, Info } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const ReportIncident = () => {
@@ -243,19 +243,37 @@ const ReportIncident = () => {
               </Select>
             </div>
 
-            {/* Severity */}
-            <div className="space-y-2">
-              <Label htmlFor="severity">Severity Level *</Label>
-              <Select value={formData.severity} onValueChange={(value) => handleInputChange('severity', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select severity level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Severity - AI Analyzed */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-primary" />
+                Severity Assessment (AI-Analyzed)
+              </Label>
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Our AI will automatically assess the severity of your report based on the description you provide. 
+                    This helps ensure appropriate response times.
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 rounded-md bg-background border">
+                      <div className="text-2xl mb-1">🟢</div>
+                      <p className="text-xs font-medium">Low</p>
+                      <p className="text-xs text-muted-foreground mt-1">Minor incidents</p>
+                    </div>
+                    <div className="text-center p-3 rounded-md bg-background border">
+                      <div className="text-2xl mb-1">🟡</div>
+                      <p className="text-xs font-medium">Medium</p>
+                      <p className="text-xs text-muted-foreground mt-1">Moderate concern</p>
+                    </div>
+                    <div className="text-center p-3 rounded-md bg-background border">
+                      <div className="text-2xl mb-1">🔴</div>
+                      <p className="text-xs font-medium">High</p>
+                      <p className="text-xs text-muted-foreground mt-1">Urgent attention</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Platform */}

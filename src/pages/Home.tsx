@@ -43,10 +43,10 @@ const Home = () => {
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-6">
-            <Shield className="h-16 w-16 text-white mr-4" />
-            <h1 className="text-5xl font-bold text-Black">CyberGuard</h1>
+            <Shield className="h-16 w-16 text-primary mr-4" />
+            <h1 className="text-5xl font-bold text-foreground">CyberGuard</h1>
           </div>
-          <p className="text-xl text-Black/90 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-foreground/90 mb-8 max-w-3xl mx-auto">
             A safe platform for reporting bullying incidents and finding community support. 
             Stand up, speak out, and help create safer spaces for everyone.
           </p>

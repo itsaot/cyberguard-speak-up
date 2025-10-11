@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Navigate } from 'react-router-dom';
-import { AlertTriangle, Flag, Users, TrendingUp, Eye, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { AlertTriangle, Flag, Users, TrendingUp, Eye, CheckCircle, XCircle, MessageSquare, UserPlus, Shield, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import stopBullyingBanner from "@/assets/stop-bullying-banner.jpg";
 import supportHands from "@/assets/support-hands.jpg";
@@ -28,6 +30,16 @@ const AdminDashboard = () => {
     totalPosts: 0,
     flaggedPosts: 0,
   });
+  const [newAdmin, setNewAdmin] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
+  const [users, setUsers] = useState([
+    { id: '1', username: 'john_doe', email: 'john@example.com', role: 'user' },
+    { id: '2', username: 'jane_smith', email: 'jane@example.com', role: 'user' },
+    { id: '3', username: 'admin_user', email: 'admin@example.com', role: 'admin' },
+  ]);
 
   // Redirect if not admin - after all hooks are called
   if (!user || !user.isAdmin) {
@@ -108,6 +120,30 @@ const AdminDashboard = () => {
       case 'harassment': return '⚠️';
       default: return '📝';
     }
+  };
+
+  const handleCreateAdmin = () => {
+    toast({
+      title: "Backend Required",
+      description: "User management requires backend functionality. Enable Lovable Cloud to use this feature.",
+      variant: "destructive",
+    });
+  };
+
+  const handlePromoteUser = (userId: string) => {
+    toast({
+      title: "Backend Required",
+      description: "User management requires backend functionality. Enable Lovable Cloud to use this feature.",
+      variant: "destructive",
+    });
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    toast({
+      title: "Backend Required",
+      description: "User management requires backend functionality. Enable Lovable Cloud to use this feature.",
+      variant: "destructive",
+    });
   };
 
   if (isLoading) {
@@ -203,6 +239,7 @@ const AdminDashboard = () => {
           <TabsTrigger value="reports">Incident Reports</TabsTrigger>
           <TabsTrigger value="flagged">Flagged Posts</TabsTrigger>
           <TabsTrigger value="forum">All Forum Posts</TabsTrigger>
+          <TabsTrigger value="users">User Management</TabsTrigger>
         </TabsList>
 
         {/* Reports Tab */}
@@ -334,6 +371,129 @@ const AdminDashboard = () => {
                 </Card>
               ))
             )}
+          </div>
+        </TabsContent>
+
+        {/* User Management Tab */}
+        <TabsContent value="users">
+          <div className="space-y-6">
+            {/* Notice */}
+            <Card className="bg-warning/10 border-warning/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start space-x-3">
+                  <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">Backend Required</h3>
+                    <p className="text-sm text-muted-foreground">
+                      User management features require backend functionality. This is a preview of the interface.
+                      Enable Lovable Cloud to activate these features with secure API endpoints.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Create New Admin */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5" />
+                  Create New Admin Account
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        placeholder="admin_user"
+                        value={newAdmin.username}
+                        onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="admin@example.com"
+                        value={newAdmin.email}
+                        onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={newAdmin.password}
+                        onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleCreateAdmin} className="w-full md:w-auto">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Create Admin Account
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* All Users List */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  All Registered Users
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {users.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Users className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{user.username}</p>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                          {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
+                          {user.role}
+                        </Badge>
+                        {user.role !== 'admin' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePromoteUser(user.id)}
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Promote to Admin
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
