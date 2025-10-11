@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, Shield, Lock, Frown, MessageCircle, Users, Wifi, Scale, UserX, MoreHorizontal } from 'lucide-react';
+import { AlertTriangle, Shield, Lock } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const ReportIncident = () => {
@@ -33,8 +33,8 @@ const ReportIncident = () => {
     try {
       // No authentication required for report submissions
       
-      // Validate required fields before sending (incidentType removed as AI handles it)
-      const requiredFields = ['platform', 'description', 'yourRole'];
+      // Validate required fields before sending
+      const requiredFields = ['incidentType', 'platform', 'description', 'yourRole'];
       const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
       
       if (missingFields.length > 0) {
@@ -87,7 +87,7 @@ const ReportIncident = () => {
       }
       
       const requestBody = {
-        incidentType: formData.incidentType.trim() || 'other', // Default to 'other' if not set, AI will categorize
+        incidentType: formData.incidentType.trim(),
         platform: formData.platform.trim(),
         description: formData.description.trim(),
         date: formData.date, // YYYY-MM-DD format
@@ -224,57 +224,23 @@ const ReportIncident = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Incident Type - Info Display */}
-            <div className="space-y-3">
-              <Label>AI-Detected Incident Categories</Label>
-              <p className="text-sm text-muted-foreground">
-                Our AI will automatically categorize your report based on the description you provide. 
-                Common categories include:
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Card className="p-3 border-2 border-primary/20 bg-primary/5">
-                  <div className="text-center space-y-1">
-                    <Frown className="h-6 w-6 mx-auto text-primary" />
-                    <p className="text-xs font-medium">Physical</p>
-                  </div>
-                </Card>
-                <Card className="p-3 border-2 border-primary/20 bg-primary/5">
-                  <div className="text-center space-y-1">
-                    <MessageCircle className="h-6 w-6 mx-auto text-primary" />
-                    <p className="text-xs font-medium">Verbal</p>
-                  </div>
-                </Card>
-                <Card className="p-3 border-2 border-primary/20 bg-primary/5">
-                  <div className="text-center space-y-1">
-                    <Users className="h-6 w-6 mx-auto text-primary" />
-                    <p className="text-xs font-medium">Social</p>
-                  </div>
-                </Card>
-                <Card className="p-3 border-2 border-primary/20 bg-primary/5">
-                  <div className="text-center space-y-1">
-                    <Wifi className="h-6 w-6 mx-auto text-primary" />
-                    <p className="text-xs font-medium">Cyber</p>
-                  </div>
-                </Card>
-                <Card className="p-3 border-2 border-primary/20 bg-primary/5">
-                  <div className="text-center space-y-1">
-                    <Scale className="h-6 w-6 mx-auto text-primary" />
-                    <p className="text-xs font-medium">Discrimination</p>
-                  </div>
-                </Card>
-                <Card className="p-3 border-2 border-primary/20 bg-primary/5">
-                  <div className="text-center space-y-1">
-                    <UserX className="h-6 w-6 mx-auto text-primary" />
-                    <p className="text-xs font-medium">Harassment</p>
-                  </div>
-                </Card>
-                <Card className="p-3 border-2 border-primary/20 bg-primary/5 md:col-span-2">
-                  <div className="text-center space-y-1">
-                    <MoreHorizontal className="h-6 w-6 mx-auto text-primary" />
-                    <p className="text-xs font-medium">Other</p>
-                  </div>
-                </Card>
-              </div>
+            {/* Incident Type */}
+            <div className="space-y-2">
+              <Label htmlFor="incidentType">Type of Incident *</Label>
+              <Select value={formData.incidentType} onValueChange={(value) => handleInputChange('incidentType', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select incident type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="physical">Physical Bullying</SelectItem>
+                  <SelectItem value="verbal">Verbal Bullying</SelectItem>
+                  <SelectItem value="social">Social/Relational Bullying</SelectItem>
+                  <SelectItem value="cyber">Cyberbullying</SelectItem>
+                  <SelectItem value="discrimination">Discrimination</SelectItem>
+                  <SelectItem value="harassment">Harassment</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Severity */}
@@ -390,7 +356,7 @@ const ReportIncident = () => {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isSubmitting || !formData.platform || !formData.description || !formData.yourRole || formData.description.length < 10}
+                disabled={isSubmitting || !formData.incidentType || !formData.platform || !formData.description || !formData.yourRole || formData.description.length < 10}
               >
                 {isSubmitting ? (
                   "Submitting Report..."
