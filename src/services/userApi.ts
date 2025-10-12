@@ -1,14 +1,14 @@
+// src/services/userApi.ts
 import { authenticatedFetch } from '@/utils/auth';
 
-const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api/auth';
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api/auth'; // <--- matches backend mount
 
 export interface User {
   _id: string;
   username: string;
-  email: string;
-  isAdmin: boolean;
-  isModerator: boolean;
-  createdAt: string;
+  email?: string;
+  role: 'user' | 'admin' | 'moderator';
+  createdAt?: string;
 }
 
 export interface CreateAdminData {
@@ -17,73 +17,49 @@ export interface CreateAdminData {
   password: string;
 }
 
-// Get all users
+// helper to parse JSON or return fallback error
+async function parseOrThrow(res: Response, fallback = 'Request failed') {
+  if (res.ok) return res.json();
+  const err = await res.json().catch(() => ({ message: fallback }));
+  throw new Error(err.message || fallback);
+}
+
+// GET /users
 export const getUsers = async (): Promise<User[]> => {
-  const response = await authenticatedFetch(`${API_BASE_URL}/users`, {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Failed to fetch users' }));
-    throw new Error(error.message || 'Failed to fetch users');
-  }
-
-  return response.json();
+  const res = await authenticatedFetch(`${API_BASE_URL}/users`, { method: 'GET' });
+  return parseOrThrow(res, 'Failed to fetch users');
 };
 
-// Get a specific user by ID
+// GET /user/:id
 export const getUserById = async (userId: string): Promise<User> => {
-  const response = await authenticatedFetch(`${API_BASE_URL}/user/${userId}`, {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Failed to fetch user' }));
-    throw new Error(error.message || 'Failed to fetch user');
-  }
-
-  return response.json();
+  const res = await authenticatedFetch(`${API_BASE_URL}/user/${userId}`, { method: 'GET' });
+  return parseOrThrow(res, 'Failed to fetch user');
 };
 
-// Create a new admin
+// POST /admin
 export const createAdmin = async (data: CreateAdminData): Promise<User> => {
-  const response = await authenticatedFetch(`${API_BASE_URL}/admin`, {
+  const res = await authenticatedFetch(`${API_BASE_URL}/admin`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Failed to create admin' }));
-    throw new Error(error.message || 'Failed to create admin');
-  }
-
-  return response.json();
+  return parseOrThrow(res, 'Failed to create admin');
 };
 
-// Promote user to admin
-export const promoteToAdmin = async (userId: string): Promise<User> => {
-  const response = await authenticatedFetch(`${API_BASE_URL}/promote/${userId}`, {
+// PATCH /promote/:userId
+export const promoteToAdmin = async (userId: string): Promise<{ message?: string }> => {
+  const res = await authenticatedFetch(`${API_BASE_URL}/promote/${userId}`, {
     method: 'PATCH',
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Failed to promote user' }));
-    throw new Error(error.message || 'Failed to promote user');
-  }
-
-  return response.json();
+  return parseOrThrow(res, 'Failed to promote user');
 };
 
-// Delete user
-export const deleteUser = async (userId: string): Promise<void> => {
-  const response = await authenticatedFetch(`${API_BASE_URL}/user/${userId}`, {
+// DELETE /user/:id
+export const deleteUser = async (userId: string): Promise<{ message?: string }> => {
+  const res = await authenticatedFetch(`${API_BASE_URL}/user/${userId}`, {
     method: 'DELETE',
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Failed to delete user' }));
-    throw new Error(error.message || 'Failed to delete user');
-  }
+  return parseOrThrow(res, 'Failed to delete user');
 };
 
 export const userApi = {
