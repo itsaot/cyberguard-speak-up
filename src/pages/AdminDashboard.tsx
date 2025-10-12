@@ -178,72 +178,75 @@ const AdminDashboard = () => {
   };
 
   const handleCreateAdmin = async () => {
-    if (!newAdmin.username || !newAdmin.email || !newAdmin.password) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      });
-      return;
-    }
+  if (!newAdmin.username || !newAdmin.email || !newAdmin.password) {
+    toast({
+      title: "Validation Error",
+      description: "Please fill in all fields.",
+      variant: "destructive",
+    });
+    return;
+  }
 
-    setIsCreatingAdmin(true);
-    try {
-      await userApi.createAdmin(newAdmin);
-      toast({
-        title: "Success",
-        description: "Admin account created successfully.",
-      });
-      setNewAdmin({ username: '', email: '', password: '' });
-      fetchUsers(); // Refresh user list
-    } catch (error) {
-      console.error('Error creating admin:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create admin account.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCreatingAdmin(false);
-    }
-  };
+  setIsCreatingAdmin(true);
+  try {
+    await userApi.createAdmin(newAdmin); // backend sets role: 'admin'
+    toast({
+      title: "Success",
+      description: "Admin account created successfully.",
+    });
+    setNewAdmin({ username: '', email: '', password: '' });
+    fetchUsers(); // ✅ refresh user list to show new admin
+  } catch (error) {
+    console.error('Error creating admin:', error);
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to create admin account.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsCreatingAdmin(false);
+  }
+};
 
-  const handlePromoteUser = async (userId: string) => {
-    try {
-      await userApi.promoteToAdmin(userId);
-      toast({
-        title: "Success",
-        description: "User promoted to admin successfully.",
-      });
-      fetchUsers(); // Refresh user list
-    } catch (error) {
-      console.error('Error promoting user:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to promote user.",
-        variant: "destructive",
-      });
-    }
-  };
+
+const handlePromoteUser = async (userId: string) => {
+  try {
+    await userApi.promoteToAdmin(userId); // backend updates role: 'admin'
+    toast({
+      title: "Success",
+      description: "User promoted to admin successfully.",
+    });
+    fetchUsers(); // refresh list
+  } catch (error) {
+    console.error('Error promoting user:', error);
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to promote user.",
+      variant: "destructive",
+    });
+  }
+};
+
 
   const handleDeleteUser = async (userId: string) => {
-    try {
-      await userApi.deleteUser(userId);
-      toast({
-        title: "Success",
-        description: "User deleted successfully.",
-      });
-      setUserToDelete(null);
-      fetchUsers(); // Refresh user list
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete user.",
-        variant: "destructive",
-      });
-    }
-  };
+  try {
+    await userApi.deleteUserByAdminByAdmin(userId); // <-- use this
+    toast({
+      title: "Success",
+      description: "User deleted successfully.",
+    });
+    setUserToDelete(null);
+    fetchUsers(); // Refresh user list
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to delete user.",
+      variant: "destructive",
+    });
+  }
+};
+
 
   const getUserRole = (user: ApiUser): string => {
     if (user.isAdmin) return 'admin';
