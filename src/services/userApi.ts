@@ -1,13 +1,12 @@
 import { authenticatedFetch } from '@/utils/auth';
 
-const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api/auth'; // <-- include /auth
-
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api/auth';
 
 export interface User {
   _id: string;
   username: string;
   email: string;
-  role: "user" | "admin" | "moderator"; 
+  role: string;      // reflects user role: 'user', 'admin', etc.
   createdAt: string;
 }
 
@@ -17,9 +16,7 @@ export interface CreateAdminData {
   password: string;
 }
 
-// ----------------------
-// Get all users (admin only)
-// ----------------------
+// Get all users
 export const getUsers = async (): Promise<User[]> => {
   const response = await authenticatedFetch(`${API_BASE_URL}/users`, {
     method: 'GET',
@@ -33,9 +30,7 @@ export const getUsers = async (): Promise<User[]> => {
   return response.json();
 };
 
-// ----------------------
-// Get user by ID (admin only)
-// ----------------------
+// Get a specific user by ID
 export const getUserById = async (userId: string): Promise<User> => {
   const response = await authenticatedFetch(`${API_BASE_URL}/user/${userId}`, {
     method: 'GET',
@@ -49,9 +44,7 @@ export const getUserById = async (userId: string): Promise<User> => {
   return response.json();
 };
 
-// ----------------------
-// Create new admin (admin only)
-// ----------------------
+// Create a new admin
 export const createAdmin = async (data: CreateAdminData): Promise<User> => {
   const response = await authenticatedFetch(`${API_BASE_URL}/admin`, {
     method: 'POST',
@@ -66,9 +59,7 @@ export const createAdmin = async (data: CreateAdminData): Promise<User> => {
   return response.json();
 };
 
-// ----------------------
-// Promote user to admin (admin only)
-// ----------------------
+// Promote user to admin
 export const promoteToAdmin = async (userId: string): Promise<User> => {
   const response = await authenticatedFetch(`${API_BASE_URL}/promote/${userId}`, {
     method: 'PATCH',
@@ -82,10 +73,8 @@ export const promoteToAdmin = async (userId: string): Promise<User> => {
   return response.json();
 };
 
-// ----------------------
-// Delete user (admin only)
-// ----------------------
-export const deleteUser = async (userId: string): Promise<void> => {
+// Delete user
+export const deleteUserByAdmin = async (userId: string): Promise<void> => {
   const response = await authenticatedFetch(`${API_BASE_URL}/user/${userId}`, {
     method: 'DELETE',
   });
@@ -101,5 +90,5 @@ export const userApi = {
   getUserById,
   createAdmin,
   promoteToAdmin,
-  deleteUser,
+  deleteUserByAdmin,
 };
