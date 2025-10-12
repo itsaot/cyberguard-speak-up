@@ -8,13 +8,24 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Navigate } from 'react-router-dom';
-import { AlertTriangle, Flag, Users, TrendingUp, Eye, CheckCircle, XCircle, MessageSquare, UserPlus, Shield, Trash2 } from 'lucide-react';
+import { AlertTriangle, Flag, Users, TrendingUp, Eye, CheckCircle, XCircle, MessageSquare, UserPlus, Shield, Trash2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import stopBullyingBanner from "@/assets/stop-bullying-banner.jpg";
 import supportHands from "@/assets/support-hands.jpg";
 import FlaggedPostsManager from '@/components/FlaggedPostsManager';
 import { postApi, PostResponse } from '@/services/postApi';
 import { reportsApi, Report } from '@/services/reportsApi';
+import { userApi, User as ApiUser, CreateAdminData } from '@/services/userApi';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 
@@ -30,16 +41,18 @@ const AdminDashboard = () => {
     totalPosts: 0,
     flaggedPosts: 0,
   });
-  const [newAdmin, setNewAdmin] = useState({
+  const [newAdmin, setNewAdmin] = useState<CreateAdminData>({
     username: '',
     email: '',
     password: '',
   });
-  const [users, setUsers] = useState([
-    { id: '1', username: 'john_doe', email: 'john@example.com', role: 'user' },
-    { id: '2', username: 'jane_smith', email: 'jane@example.com', role: 'user' },
-    { id: '3', username: 'admin_user', email: 'admin@example.com', role: 'admin' },
-  ]);
+  const [users, setUsers] = useState<ApiUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<ApiUser[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
   // Redirect if not admin - after all hooks are called
   if (!user || !user.isAdmin) {
@@ -48,7 +61,32 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    fetchUsers();
   }, []);
+
+  // Filter users based on search and role
+  useEffect(() => {
+    let filtered = users;
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(user => 
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply role filter
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(user => {
+        if (roleFilter === 'admin') return user.isAdmin;
+        if (roleFilter === 'user') return !user.isAdmin && !user.isModerator;
+        return true;
+      });
+    }
+
+    setFilteredUsers(filtered);
+  }, [users, searchQuery, roleFilter]);
 
   const fetchDashboardData = async () => {
     try {
@@ -122,28 +160,95 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateAdmin = () => {
-    toast({
-      title: "Backend Required",
-      description: "User management requires backend functionality. Enable Lovable Cloud to use this feature.",
-      variant: "destructive",
-    });
+  const fetchUsers = async () => {
+    setIsLoadingUsers(true);
+    try {
+      const usersData = await userApi.getUsers();
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load users.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingUsers(false);
+    }
   };
 
-  const handlePromoteUser = (userId: string) => {
-    toast({
-      title: "Backend Required",
-      description: "User management requires backend functionality. Enable Lovable Cloud to use this feature.",
-      variant: "destructive",
-    });
+  const handleCreateAdmin = async () => {
+    if (!newAdmin.username || !newAdmin.email || !newAdmin.password) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingAdmin(true);
+    try {
+      await userApi.createAdmin(newAdmin);
+      toast({
+        title: "Success",
+        description: "Admin account created successfully.",
+      });
+      setNewAdmin({ username: '', email: '', password: '' });
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create admin account.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingAdmin(false);
+    }
   };
 
-  const handleDeleteUser = (userId: string) => {
-    toast({
-      title: "Backend Required",
-      description: "User management requires backend functionality. Enable Lovable Cloud to use this feature.",
-      variant: "destructive",
-    });
+  const handlePromoteUser = async (userId: string) => {
+    try {
+      await userApi.promoteToAdmin(userId);
+      toast({
+        title: "Success",
+        description: "User promoted to admin successfully.",
+      });
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      console.error('Error promoting user:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to promote user.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await userApi.deleteUser(userId);
+      toast({
+        title: "Success",
+        description: "User deleted successfully.",
+      });
+      setUserToDelete(null);
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getUserRole = (user: ApiUser): string => {
+    if (user.isAdmin) return 'admin';
+    if (user.isModerator) return 'moderator';
+    return 'user';
   };
 
   if (isLoading) {
@@ -377,22 +482,6 @@ const AdminDashboard = () => {
         {/* User Management Tab */}
         <TabsContent value="users">
           <div className="space-y-6">
-            {/* Notice */}
-            <Card className="bg-warning/10 border-warning/20">
-              <CardContent className="pt-6">
-                <div className="flex items-start space-x-3">
-                  <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">Backend Required</h3>
-                    <p className="text-sm text-muted-foreground">
-                      User management features require backend functionality. This is a preview of the interface.
-                      Enable Lovable Cloud to activate these features with secure API endpoints.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Create New Admin */}
             <Card>
               <CardHeader>
@@ -411,6 +500,7 @@ const AdminDashboard = () => {
                         placeholder="admin_user"
                         value={newAdmin.username}
                         onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}
+                        disabled={isCreatingAdmin}
                       />
                     </div>
                     <div className="space-y-2">
@@ -421,6 +511,7 @@ const AdminDashboard = () => {
                         placeholder="admin@example.com"
                         value={newAdmin.email}
                         onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
+                        disabled={isCreatingAdmin}
                       />
                     </div>
                     <div className="space-y-2">
@@ -431,13 +522,59 @@ const AdminDashboard = () => {
                         placeholder="••••••••"
                         value={newAdmin.password}
                         onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
+                        disabled={isCreatingAdmin}
                       />
                     </div>
                   </div>
-                  <Button onClick={handleCreateAdmin} className="w-full md:w-auto">
+                  <Button 
+                    onClick={handleCreateAdmin} 
+                    className="w-full md:w-auto"
+                    disabled={isCreatingAdmin}
+                  >
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Create Admin Account
+                    {isCreatingAdmin ? 'Creating...' : 'Create Admin Account'}
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Search and Filter */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by username or email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={roleFilter === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setRoleFilter('all')}
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant={roleFilter === 'admin' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setRoleFilter('admin')}
+                    >
+                      <Shield className="h-4 w-4 mr-1" />
+                      Admins
+                    </Button>
+                    <Button
+                      variant={roleFilter === 'user' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setRoleFilter('user')}
+                    >
+                      Users
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -447,56 +584,95 @@ const AdminDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  All Registered Users
+                  All Registered Users ({filteredUsers.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {users.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Users className="h-5 w-5 text-primary" />
+                {isLoadingUsers ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
+                    <p className="text-muted-foreground">Loading users...</p>
+                  </div>
+                ) : filteredUsers.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No users found</h3>
+                    <p className="text-muted-foreground">
+                      {searchQuery || roleFilter !== 'all' 
+                        ? 'Try adjusting your search or filters.'
+                        : 'No users registered yet.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredUsers.map((user) => (
+                      <div
+                        key={user._id}
+                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Users className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{user.username}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{user.username}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                          {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
-                          {user.role}
-                        </Badge>
-                        {user.role !== 'admin' && (
+                        <div className="flex items-center space-x-3">
+                          <Badge variant={user.isAdmin ? 'default' : 'secondary'} className="capitalize">
+                            {user.isAdmin && <Shield className="h-3 w-3 mr-1" />}
+                            {getUserRole(user)}
+                          </Badge>
+                          {!user.isAdmin && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handlePromoteUser(user._id)}
+                            >
+                              <Shield className="h-4 w-4 mr-2" />
+                              Promote to Admin
+                            </Button>
+                          )}
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            onClick={() => handlePromoteUser(user.id)}
+                            onClick={() => setUserToDelete(user._id)}
                           >
-                            <Shield className="h-4 w-4 mr-2" />
-                            Promote to Admin
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the user account
+              and remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => userToDelete && handleDeleteUser(userToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
