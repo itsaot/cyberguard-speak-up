@@ -1,6 +1,6 @@
 import { authenticatedFetch } from '@/utils/auth';
 
-const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api';
+const API_BASE_URL = 'https://cybergaurdapi.onrender.com/api/auth';
 
 export interface User {
   _id: string;
