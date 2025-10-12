@@ -79,8 +79,8 @@ const AdminDashboard = () => {
     // Apply role filter
     if (roleFilter !== 'all') {
       filtered = filtered.filter(user => {
-        if (roleFilter === 'admin') return user.isAdmin;
-        if (roleFilter === 'user') return !user.isAdmin && !user.isModerator;
+        if (roleFilter === 'admin') return user.role === 'admin';
+        if (roleFilter === 'user') return user.role === 'user';
         return true;
       });
     }
@@ -229,29 +229,27 @@ const handlePromoteUser = async (userId: string) => {
 
 
   const handleDeleteUser = async (userId: string) => {
-  try {
-    await userApi.deleteUserByAdminByAdmin(userId); // <-- use this
-    toast({
-      title: "Success",
-      description: "User deleted successfully.",
-    });
-    setUserToDelete(null);
-    fetchUsers(); // Refresh user list
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    toast({
-      title: "Error",
-      description: error instanceof Error ? error.message : "Failed to delete user.",
-      variant: "destructive",
-    });
-  }
-};
+    try {
+      await userApi.deleteUserByAdmin(userId);
+      toast({
+        title: "Success",
+        description: "User deleted successfully.",
+      });
+      setUserToDelete(null);
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user.",
+        variant: "destructive",
+      });
+    }
+  };
 
 
   const getUserRole = (user: ApiUser): string => {
-    if (user.isAdmin) return 'admin';
-    if (user.isModerator) return 'moderator';
-    return 'user';
+    return user.role;
   };
 
   if (isLoading) {
@@ -623,11 +621,11 @@ const handlePromoteUser = async (userId: string) => {
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <Badge variant={user.isAdmin ? 'default' : 'secondary'} className="capitalize">
-                            {user.isAdmin && <Shield className="h-3 w-3 mr-1" />}
+                          <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="capitalize">
+                            {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
                             {getUserRole(user)}
                           </Badge>
-                          {!user.isAdmin && (
+                          {user.role !== 'admin' && (
                             <Button
                               variant="outline"
                               size="sm"
