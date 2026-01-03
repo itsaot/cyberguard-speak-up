@@ -26,7 +26,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <Shield className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-foreground">CyberGuard</span>
+              <span className="text-xl font-bold text-foreground">Anti-Bully Guard</span>
             </Link>
 
             {/* Navigation */}
@@ -134,7 +134,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-4">
               <Shield className="h-6 w-6 text-primary" />
-              <span className="text-lg font-semibold">CyberGuard</span>
+              <span className="text-lg font-semibold">Anti-Bully Guard</span>
             </div>
             <p className="text-muted-foreground">
               Creating safer spaces through anonymous reporting and community support.

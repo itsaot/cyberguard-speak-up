@@ -44,7 +44,7 @@ const Home = () => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-6">
             <Shield className="h-16 w-16 text-primary mr-4" />
-            <h1 className="text-5xl font-bold text-foreground">CyberGuard</h1>
+            <h1 className="text-5xl font-bold text-foreground">Anti-Bully Guard</h1>
           </div>
           <p className="text-xl text-foreground/90 mb-8 max-w-3xl mx-auto">
             A safe platform for reporting bullying incidents and finding community support. 
@@ -71,7 +71,7 @@ const Home = () => {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">How CyberGuard Works</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">How Anti-Bully Guard Works</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Our platform provides multiple ways to address bullying and create positive change in your community.
             </p>
@@ -97,7 +97,7 @@ const Home = () => {
           <h2 className="text-3xl font-bold text-foreground mb-4">Take Action Today</h2>
           <p className="text-lg text-muted-foreground mb-8">
             Whether you're experiencing bullying, witnessing it, or want to support others, 
-            CyberGuard provides the tools you need to make a difference.
+            Anti-Bully Guard provides the tools you need to make a difference.
           </p>
           
           <div className="grid md:grid-cols-2 gap-6">
