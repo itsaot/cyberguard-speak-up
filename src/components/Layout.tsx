@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, Home, MessageSquare, AlertTriangle, LogOut, User, Bot, Settings } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -48,7 +49,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </nav>
 
             {/* Auth Section */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <ThemeToggle />
               {user ? (
                 <div className="flex items-center space-x-2">
                   <div className="flex items-center space-x-2 text-sm">
