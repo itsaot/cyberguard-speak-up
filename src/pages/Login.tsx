@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,25 +49,33 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Header */}
-        <div className="text-center">
+        <div className="text-center animate-fade-in">
           <div className="flex items-center justify-center mb-6">
-            <Shield className="h-12 w-12 text-primary mr-3" />
-            <h1 className="text-3xl font-bold text-foreground">CyberGuard</h1>
+            <div className="p-3 bg-primary/10 rounded-2xl">
+              <Shield className="h-12 w-12 text-primary" />
+            </div>
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Login</h2>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Anti-Bully Guard</h1>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Welcome Back</h2>
           <p className="text-muted-foreground">
             Sign in to access your account and manage reports.
           </p>
         </div>
 
         {/* Login Form */}
-        <Card>
+        <Card className="border-border/50 shadow-xl backdrop-blur-sm bg-card/80 animate-scale-in">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5" />
+              <User className="h-5 w-5 text-primary" />
               <span>Sign In</span>
             </CardTitle>
           </CardHeader>
@@ -82,6 +89,7 @@ const Login = () => {
                   placeholder="Enter username"
                   value={credentials.username}
                   onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
+                  className="bg-background/50"
                   required
                 />
               </div>
@@ -94,13 +102,14 @@ const Login = () => {
                   placeholder="Enter password"
                   value={credentials.password}
                   onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
+                  className="bg-background/50"
                   required
                 />
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full transition-all duration-200 hover:scale-[1.02]" 
                 disabled={isLoading || !credentials.username || !credentials.password}
               >
                 {isLoading ? (
@@ -117,16 +126,12 @@ const Login = () => {
         </Card>
 
         {/* Help Text */}
-        <div className="text-center">
+        <div className="text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <p className="text-sm text-muted-foreground">
             Don't have an account?{' '}
             <Link to="/register" className="font-medium text-primary hover:underline">
               Register Account
             </Link>
-            <br />
-            <span className="text-xs">
-              Development Mode
-            </span>
           </p>
         </div>
       </div>

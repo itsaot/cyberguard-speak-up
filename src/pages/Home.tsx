@@ -79,9 +79,13 @@ const Home = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow">
+              <Card 
+                key={index} 
+                className="text-center p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 group cursor-pointer border-border/50"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
                 <CardContent className="pt-4">
-                  <feature.icon className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <feature.icon className="h-12 w-12 text-primary mx-auto mb-4 transition-transform duration-300 group-hover:scale-110" />
                   <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm">{feature.description}</p>
                 </CardContent>
@@ -101,8 +105,8 @@ const Home = () => {
           </p>
           
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-6 relative overflow-hidden">
-              <div className="absolute inset-0 opacity-20">
+            <Card className="p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
                 <img 
                   src={helpingHands} 
                   alt="Helping hands representing support" 
@@ -110,19 +114,19 @@ const Home = () => {
                 />
               </div>
               <CardContent className="text-center relative z-10">
-                <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4" />
+                <AlertTriangle className="h-12 w-12 text-warning mx-auto mb-4 transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="text-xl font-semibold mb-2">Report an Incident</h3>
                 <p className="text-muted-foreground mb-4">
                   Safely and anonymously report bullying incidents. Your report will be reviewed by our admin team.
                 </p>
                 <Link to="/report">
-                  <Button className="w-full">Get Started</Button>
+                  <Button className="w-full transition-all duration-200 hover:scale-[1.02]">Get Started</Button>
                 </Link>
               </CardContent>
             </Card>
             
-            <Card className="p-6 relative overflow-hidden">
-              <div className="absolute inset-0 opacity-20">
+            <Card className="p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
                 <img 
                   src={safeSpace} 
                   alt="Safe space concept with protection" 
@@ -130,13 +134,13 @@ const Home = () => {
                 />
               </div>
               <CardContent className="text-center relative z-10">
-                <MessageSquare className="h-12 w-12 text-accent mx-auto mb-4" />
+                <MessageSquare className="h-12 w-12 text-accent mx-auto mb-4 transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="text-xl font-semibold mb-2">Join the Community</h3>
                 <p className="text-muted-foreground mb-4">
                   Connect with others, share your experiences, and find support in our community forum.
                 </p>
                 <Link to="/forum">
-                  <Button variant="outline" className="w-full">Join Discussion</Button>
+                  <Button variant="outline" className="w-full transition-all duration-200 hover:scale-[1.02]">Join Discussion</Button>
                 </Link>
               </CardContent>
             </Card>
